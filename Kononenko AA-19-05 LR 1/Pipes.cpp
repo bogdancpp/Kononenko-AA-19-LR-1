@@ -12,28 +12,19 @@ void menu()
 		<< "6. Save to file" << endl << "7. Download from file" << endl << "0. Exit" << endl << endl;
 }
 
-void CheckInt(int& n, int less, int more, string s)
+template <typename T>
+T CheckNum(T less, T more, string s)
 {
-	cin >> n;
-	while (cin.fail() || n < less || n > more)
+	T num;
+	cin >> num;
+	while (cin.fail() || num < less || num > more)
 	{
 		cout << s;
 		cin.clear();
 		cin.ignore(100, '\n');
-		cin >> n;
+		cin >> num;
 	}
-}
-
-void CheckFloat(float& n, string s)
-{
-	cin >> n;
-	while (cin.fail() || n < 0)
-	{
-		cout << s;
-		cin.clear();
-		cin.ignore(100, '\n');
-		cin >> n;
-	}
+	return num;
 }
 
 struct Pipe
@@ -51,6 +42,82 @@ struct CprStn
 	string name;
 };
 
+ostream& operator << (ostream& out, const vector<CprStn>& cs)
+{
+	for (const CprStn& c : cs)
+	{
+		out.precision(2);
+		out << "CS id: " << c.id << endl << "Name: " << c.name
+			<< endl << "Quantity of workshops: " << c.totalShop << endl
+			<< "Quantity of workshop workers: " << c.workShop << endl
+			<< "Efficiency: " << c.efficiency << endl << endl;
+	}
+	return out;
+}
+
+ostream& operator << (ostream& out, const CprStn& cs)
+{
+		out.precision(2);
+		out << "CS id: " << cs.id << endl << "Name: " << cs.name
+			<< endl << "Quantity of workshops: " << cs.totalShop << endl
+			<< "Quantity of workshop workers: " << cs.workShop << endl
+			<< "Efficiency: " << cs.efficiency << endl << endl;
+	return out;
+}
+
+ostream& operator << (ostream& out, const Pipe& p)
+{
+	out << "Pipe id: " << p.id << endl << "diametr: " << p.diametr << endl
+		<< "length: " << p.length << endl << "pipe condition: ";
+	return out;
+}
+
+ofstream& operator <<(ofstream& fout, const vector<CprStn>& cs)
+{
+	for (const CprStn& c : cs)
+	{
+		fout.precision(2);
+		fout << c.id << endl << c.name << endl << c.totalShop << endl
+			<< c.workShop << endl << c.efficiency << endl << endl;
+	}
+	return fout;
+}
+
+ofstream& operator <<(ofstream& fout, const vector<Pipe>& pipes)
+{
+	for (const Pipe& p : pipes)
+	{
+		fout << p.id << endl << p.diametr << endl
+			<< p.length << endl << p.repair << endl << endl;
+	}
+	return fout;
+}
+
+ifstream& operator >> (ifstream& in, vector<Pipe>& pipes)
+{
+	for(Pipe& p : pipes)
+	{
+		in >> p.id;
+		in >> p.diametr;
+		in >> p.length;
+		in >> p.repair;
+	}
+	return in;
+}
+
+ifstream& operator >> (ifstream& in, vector<CprStn>& cs)
+{
+	for (CprStn& c : cs)
+	{
+		in >> c.id;
+		in >> c.name;
+		in >> c.totalShop;
+		in >> c.workShop;
+		in >> c.efficiency;
+	}
+	return in;
+}
+
 CprStn AddCS(int j)
 {
 	CprStn r;
@@ -60,13 +127,12 @@ CprStn AddCS(int j)
 	cout << "Enter the name of the compressor station - " ;
 	cin.ignore();
 	getline(cin, r.name);
-	//cin >> r.name;//getline
 
 	cout << "Enter the number of workshops - ";
-	CheckInt(r.totalShop, 0, 10000, "Enter the number of workshops (enter correct value) - ");
+	r.totalShop = CheckNum(0, 1000, "Enter the number of workshops (enter correct value) - ");
 
 	cout << "Enter the number of workshop workers - ";
-	CheckInt(r.workShop, 0, r.totalShop, "Enter the number of workshops  workers (enter correct value) - ");
+	r.workShop = CheckNum(0, r.totalShop, "Enter the number of workshops  workers (enter correct value) - ");
 
 	r.efficiency = 1. / (rand() % 100);
 
@@ -82,10 +148,10 @@ Pipe AddPipe(int i)
 	cout <<"Adding a pipe..." << endl;
 
 	cout << "Enter the diameter in millimeters - ";
-	CheckFloat(p.diametr, "Enter the diameter in millimeters (more zero and not letter) - ");
+	p.diametr = CheckNum<double>(0, 10000, "Enter the diameter in millimeters (more zero and not letter) - ");
 
 	cout << "Enter the length in meters - ";
-	CheckFloat(p.length, "Enter the length in meters (more zero and not letter) - ");
+	p.length = CheckNum<double>(0, 10000, "Enter the length in meters (more zero and not letter) - ");
 
 	cout << endl;
 	return p;
@@ -93,16 +159,18 @@ Pipe AddPipe(int i)
 
 void EditPipe(vector<Pipe>& pipes)
 {
-	cout << "Id of the pipe you want to edit: " << 0 << " - " << pipes.size() << endl;
+	cout << "Id of the pipe you want to edit: " << 0 << " - " << pipes.size()-1 << endl;
 
 	cout << "Choose - ";
-	int id;
-	CheckInt(id, 0, pipes.size()-1, "Select an existing id ");
+	int id, u;
+	u = pipes.size() - 1; // Почему то если подставить сразу - выдает ошибку???
+	id = CheckNum(0, u, "Select an existing id ");
 
 	cout << "0. The pipe is serviceable" << endl << "1. Pipe repair" << endl;
 	int choice;
 	cout << "Choose - ";
-	CheckInt(choice, 0, 1, "Select 0 or 1 not otherwise - ");
+	choice = CheckNum(0, 1, "Select 0 or 1 not otherwise - ");
+
 
 	pipes[id].repair = choice;
 	cout << endl;
@@ -110,16 +178,18 @@ void EditPipe(vector<Pipe>& pipes)
 
 void EditCs(vector<CprStn>& cs)
 {
-	cout << "Id of the compressor station you want to edit: " << 0 << " - " << cs.size() << endl;
+	cout << "Id of the compressor station you want to edit: " << 0 << " - " << cs.size()-1 << endl;
 
 	cout << "Choose - ";
-	int id;
-	CheckInt(id, 0, cs.size() - 1, "Select an existing id ");
+	int id,u;
+	u = cs.size() - 1;
+	id = CheckNum(0, u, "Select an existing id ");
 
 	cout << "0. Start the workshop" << endl << "1. Stop the workshop" << endl;
 	int choice;
 	cout << "Choose - ";
-	CheckInt(choice, 0, 1, "Select 0 or 1 not otherwise - ");
+	choice = CheckNum(0, 1, "Select 0 or 1 not otherwise - ");
+
 
 	if (choice == 0) // сделать проверку ещё когда вывод всех объектов
 	{
@@ -140,27 +210,18 @@ string checkRepair(const Pipe& p) // tenarnarniy operator ne rabotaet
 void ViewAll(const vector<Pipe>& pipes,const vector<CprStn>& cs)
 {
 	cout <<  "All available objects..." << endl << endl;
-	for (size_t i = 0; i < pipes.size(); i++)
+	for (const Pipe& p : pipes)
 	{
-		cout << "Pipe id: " << pipes[i].id << endl << "diametr: " << pipes[i].diametr << endl
-			<< "length: " << pipes[i].length << endl << "pipe condition: " << checkRepair(pipes[i]) << endl;
-		//	(pipes[i].repair) ? cout << "Working \n\n" : cout << "Unworking \n\n";
-	}	
-	for (size_t i = 0; i < cs.size(); i++)
-	{
-		cout.precision(2);
-		cout << "CS id: " << cs[i].id << endl << "Name: " << cs[i].name 
-			<< endl << "Quantity of workshops: " << cs[i].totalShop << endl
-			<< "Quantity of workshop workers: " << cs[i].workShop << endl
-			<< "Efficiency: " << cs[i].efficiency << endl << endl;
+		cout << p << checkRepair(p);
 	}
+	cout << cs;
 }
 
 void ViewThat(const vector<Pipe>& pipes, const vector<CprStn>& cs)
 {
 	cout << "1. View all\n" << "2. View pipes\n" << "3. View compressor station\n";
 	int choise;
-	CheckInt(choise, 1, 3, "Enter from 1 to 3\n");
+	choise = CheckNum(1, 3, "Enter from 1 to 3\n");
 	switch (choise)
 	{
 	case 1:
@@ -171,26 +232,23 @@ void ViewThat(const vector<Pipe>& pipes, const vector<CprStn>& cs)
 	case 2:
 	{
 		cout << "Select id you want to output: 0 - " << pipes.size() - 1 << endl;
-		int OutPipe;
+		int OutPipe, u;
+		u = pipes.size();
 		cout << "Select - ";
-		CheckInt(OutPipe, 0, pipes.size(), "Enter from existing pipes\n");
+		OutPipe = CheckNum(0, u, "Enter from existing pipes\n");
 		cout << endl;
-		cout << "Pipe id: " << pipes[OutPipe].id << endl << "diametr: " << pipes[OutPipe].diametr << endl
-			<< "length: " << pipes[OutPipe].length << endl << "pipe condition: " << checkRepair(pipes[OutPipe]) << endl;
+		cout << pipes[OutPipe] << checkRepair(pipes[OutPipe]) << endl;
 		break;
 	}
 	case 3:
 	{
 		cout << "Select id you want to output: 0 - " << cs.size() - 1 << endl;
-		int OutCs;
+		int OutCs, u;
+		u = cs.size();
 		cout << "Select - ";
-		CheckInt(OutCs, 0, cs.size(), "Enter from existing cs\n\n");
+		OutCs = CheckNum(0, u, "Enter from existing cs\n\n");
 		cout << endl;
-		cout.precision(2);
-		cout << "CS id: " << cs[OutCs].id << endl << "Name: " << cs[OutCs].name
-			<< endl << "Quantity of workshops: " << cs[OutCs].totalShop << endl
-			<< "Quantity of workshop workers: " << cs[OutCs].workShop << endl
-			<< "Efficiency: " << cs[OutCs].efficiency << endl << endl;
+		cout << cs[OutCs] << endl;
 		break;
 	}
 	}
@@ -210,19 +268,8 @@ void SaveAll(const vector<Pipe>& pipes, const vector<CprStn>& cs)
 
 		if (pipes.size() != 0 || cs.size() != 0)
 		{
-			for (size_t i = 0; i < pipes.size(); i++)
-			{
-				string k = checkRepair(pipes[i]);
-				fout << pipes[i].id << endl << pipes[i].diametr << endl
-					<< pipes[i].length << endl << pipes[i].repair << endl << endl;
-			}
-
-			for (size_t i = 0; i < cs.size(); i++)
-			{
-				fout.precision(2);
-				fout << cs[i].id << endl << cs[i].name << endl << cs[i].totalShop << endl
-					<< cs[i].workShop << endl << cs[i].efficiency << endl << endl;
-			}
+			fout << pipes;
+			fout << cs;
 			cout << "File saved" << endl << endl;
 		}
 		else
@@ -251,22 +298,8 @@ void LoadAll(vector<Pipe>& pipes, vector<CprStn>& cs)
 		pipes.resize(lenpipe);
 		cs.resize(lencs);
 
-		for (size_t i = 0; i < pipes.size(); i++)
-		{
-			fin >> pipes[i].id;
-			fin >> pipes[i].diametr;
-			fin >> pipes[i].length;
-			fin >> pipes[i].repair;
-		}
-
-		for (size_t i = 0; i < cs.size(); i++)
-		{
-			fin >> cs[i].id;
-			fin >> cs[i].name;
-			fin >> cs[i].totalShop;
-			fin >> cs[i].workShop;
-			fin >> cs[i].efficiency;
-		}
+		fin >> pipes;
+		fin >> cs;
 		fin.close();
 	}
 	else
@@ -289,7 +322,7 @@ int main()
 
 		cout << "Selected action - ";
 		int n;
-		CheckInt(n, 0, 7, "Selected action(enter correct value from 0 to 7) - ");
+		n = CheckNum(0, 7, "Selected action(enter correct value from 0 to 7) - ");
 		cout << endl;
 
 		switch (n)

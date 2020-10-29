@@ -2,6 +2,10 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <ctime>
+#include "CPipe.h"
+#include "CCS.h"
+#include "Utils.h"
 
 using namespace std;
 
@@ -11,81 +15,39 @@ void menu()
 		<< "4. Edit pipe" << endl << "5. Edit compressor station" << endl
 		<< "6. Save to file" << endl << "7. Download from file" << endl << "0. Exit" << endl << endl;
 }
-
-template <typename T>
-T CheckNum(T less, T more, string s)
+// +++++++++++++++++++++++=
+ostream& operator << (ostream& out, const vector<CCS>& cs)
 {
-	T num;
-	cin >> num;
-	while (cin.fail() || num < less || num > more)
+	for (const CCS& c : cs)
 	{
-		cout << s;
-		cin.clear();
-		cin.ignore(100, '\n');
-		cin >> num;
-	}
-	return num;
-}
-
-struct Pipe
-{
-	unsigned short id; 
-	float diametr, length; // diameter mm, length metr
-	bool repair = false;
-};
-
-struct CprStn
-{
-	unsigned short id;
-	int totalShop, workShop;
-	float efficiency;
-	string name;
-};
-
-ostream& operator << (ostream& out, const vector<CprStn>& cs)
-{
-	for (const CprStn& c : cs)
-	{
-		out.precision(2);
-		out << "CS id: " << c.id << endl << "Name: " << c.name
-			<< endl << "Quantity of workshops: " << c.totalShop << endl
-			<< "Quantity of workshop workers: " << c.workShop << endl
-			<< "Efficiency: " << c.efficiency << endl << endl;
+		out << c;
 	}
 	return out;
-}
-
-ostream& operator << (ostream& out, const CprStn& cs)
+} 
+// +++++++++++++++
+ostream& operator << (ostream& out, const vector<CPipe>& p)
 {
-		out.precision(2);
-		out << "CS id: " << cs.id << endl << "Name: " << cs.name
-			<< endl << "Quantity of workshops: " << cs.totalShop << endl
-			<< "Quantity of workshop workers: " << cs.workShop << endl
-			<< "Efficiency: " << cs.efficiency << endl << endl;
+	for (const CPipe& pipe : p)
+	{
+		out << pipe;
+	}
 	return out;
-}
-
-ostream& operator << (ostream& out, const Pipe& p)
+} 
+// ???????
+ofstream& operator << (ofstream& fout, const vector<CCS>& cs)
 {
-	out << "Pipe id: " << p.id << endl << "diametr: " << p.diametr << endl
-		<< "length: " << p.length << endl << "pipe condition: ";
-	return out;
-}
-
-ofstream& operator <<(ofstream& fout, const vector<CprStn>& cs)
-{
-	for (const CprStn& c : cs)
+	for (const CCS& c : cs)
 	{
 		fout.precision(2);
 		fout << c.id << endl << c.name << endl << c.totalShop << endl
 			<< c.workShop << endl << c.efficiency << endl << endl;
 	}
 	return fout;
-}
+} 
 
-ofstream& operator <<(ofstream& fout, const vector<Pipe>& pipes)
+ofstream& operator << (ofstream& fout, const vector<CPipe>& pipes)
 {
-	for (const Pipe& p : pipes)
+	for (const CPipe& p : pipes)
 	{
 		fout << p.id << endl << p.diametr << endl
 			<< p.length << endl << p.repair << endl << endl;
@@ -93,35 +55,49 @@ ofstream& operator <<(ofstream& fout, const vector<Pipe>& pipes)
 	return fout;
 }
 
-ifstream& operator >> (ifstream& in, vector<Pipe>& pipes)
+// как это в класс убрать
+ifstream& operator >> (ifstream& in, CPipe& p) // 
 {
-	for(Pipe& p : pipes)
+	in >> p.id;
+	in >> p.diametr;
+	in >> p.length;
+	in >> p.repair;
+
+	return in;
+}
+
+ifstream& operator >> (ifstream& in, vector<CPipe>& pipes)
+{
+	for(CPipe& p : pipes)
 	{
-		in >> p.id;
-		in >> p.diametr;
-		in >> p.length;
-		in >> p.repair;
+		in >> p;
 	}
 	return in;
 }
 
-ifstream& operator >> (ifstream& in, vector<CprStn>& cs)
+ifstream& operator >> (ifstream& in, CCS& c)
 {
-	for (CprStn& c : cs)
+	in >> c.id;
+	in >> c.name;
+	in >> c.totalShop;
+	in >> c.workShop;
+	in >> c.efficiency;
+	
+	return in;
+}
+
+ifstream& operator >> (ifstream& in, vector<CCS>& cs)
+{
+	for (CCS& c : cs)
 	{
-		in >> c.id;
-		in >> c.name;
-		in >> c.totalShop;
-		in >> c.workShop;
-		in >> c.efficiency;
+		in >> c;
 	}
 	return in;
 }
 
-CprStn AddCS(int j)
+CCS AddCS()
 {
-	CprStn r;
-	r.id = j;
+	CCS r;
 	cout << "Adding a compressor station..." << endl;
 
 	cout << "Enter the name of the compressor station - " ;
@@ -134,16 +110,16 @@ CprStn AddCS(int j)
 	cout << "Enter the number of workshop workers - ";
 	r.workShop = CheckNum(0, r.totalShop, "Enter the number of workshops  workers (enter correct value) - ");
 
+	srand(time(NULL));
 	r.efficiency = 1. / (rand() % 100);
 
 	cout << endl;
 	return r;
 }
 
-Pipe AddPipe(int i)
+CPipe AddPipe()
 {
-	Pipe p;
-	p.id = i;
+	CPipe p;
 
 	cout <<"Adding a pipe..." << endl;
 
@@ -157,7 +133,7 @@ Pipe AddPipe(int i)
 	return p;
 } 
 
-void EditPipe(vector<Pipe>& pipes)
+void EditPipe(vector<CPipe>& pipes)
 {
 	cout << "Id of the pipe you want to edit: " << 0 << " - " << pipes.size()-1 << endl;
 
@@ -176,7 +152,7 @@ void EditPipe(vector<Pipe>& pipes)
 	cout << endl;
 }
 
-void EditCs(vector<CprStn>& cs)
+void EditCs(vector<CCS>& cs)
 {
 	cout << "Id of the compressor station you want to edit: " << 0 << " - " << cs.size()-1 << endl;
 
@@ -191,33 +167,22 @@ void EditCs(vector<CprStn>& cs)
 	choice = CheckNum(0, 1, "Select 0 or 1 not otherwise - ");
 
 
-	if (choice == 0) // сделать проверку ещё когда вывод всех объектов
+	if (choice == 0 && (cs[id].totalShop > cs[id].workShop)) // сделать проверку ещё когда вывод всех объектов
 	{
 		cs[id].workShop += 1;// ternarn
 	}
-	else
+	else if (choice == 1)
 	{
 		cs[id].workShop -= 1;
+	}
+	else
+	{
+		cout << "\nMaking more workshops impossible\n";
 	}
 	cout << endl;
 }
 
-string checkRepair(const Pipe& p) // tenarnarniy operator ne rabotaet 
-{
-	return (p.repair)  ?  "Unworking \n\n" : "Working \n\n"  ;
-}
-
-void ViewAll(const vector<Pipe>& pipes,const vector<CprStn>& cs)
-{
-	cout <<  "All available objects..." << endl << endl;
-	for (const Pipe& p : pipes)
-	{
-		cout << p << checkRepair(p);
-	}
-	cout << cs;
-}
-
-void ViewThat(const vector<Pipe>& pipes, const vector<CprStn>& cs)
+void ViewThat(const vector<CPipe>& pipes, const vector<CCS>& cs)
 {
 	cout << "1. View all\n" << "2. View pipes\n" << "3. View compressor station\n";
 	int choise;
@@ -226,18 +191,19 @@ void ViewThat(const vector<Pipe>& pipes, const vector<CprStn>& cs)
 	{
 	case 1:
 	{
-		ViewAll(pipes, cs);
+		cout << pipes;
+		cout << cs;
 		break;
 	}
 	case 2:
 	{
 		cout << "Select id you want to output: 0 - " << pipes.size() - 1 << endl;
 		int OutPipe, u;
-		u = pipes.size();
+		u = pipes.size(); // 4 byte like int sizeof
 		cout << "Select - ";
 		OutPipe = CheckNum(0, u, "Enter from existing pipes\n");
 		cout << endl;
-		cout << pipes[OutPipe] << checkRepair(pipes[OutPipe]) << endl;
+		cout << pipes[OutPipe] << endl;
 		break;
 	}
 	case 3:
@@ -255,7 +221,7 @@ void ViewThat(const vector<Pipe>& pipes, const vector<CprStn>& cs)
 
 }
 
-void SaveAll(const vector<Pipe>& pipes, const vector<CprStn>& cs)
+void SaveAll(const vector<CPipe>& pipes, const vector<CCS>& cs)
 {
 	ofstream fout;
 
@@ -284,7 +250,7 @@ void SaveAll(const vector<Pipe>& pipes, const vector<CprStn>& cs)
 	}
 }
 
-void LoadAll(vector<Pipe>& pipes, vector<CprStn>& cs)
+void LoadAll(vector<CPipe>& pipes, vector<CCS>& cs)
 {
 	ifstream fin;
 	fin.open("Bogdan_LR1.txt", ios::in);
@@ -297,6 +263,8 @@ void LoadAll(vector<Pipe>& pipes, vector<CprStn>& cs)
 
 		pipes.resize(lenpipe);
 		cs.resize(lencs);
+	/*	pipes.reserve(lenpipe);
+		cs.reserve(lencs);*/
 
 		fin >> pipes;
 		fin >> cs;
@@ -312,9 +280,8 @@ int main()
 {
 	system("color 70");
 	cout << "\t\tKononenko Bogdan AA-19-05\n";
-	vector <Pipe> pipes;
-	vector <CprStn> cs;
-	size_t i = 1, j = 1;
+	vector <CPipe> pipes;
+	vector <CCS> cs;
 
 	while (true)
 	{
@@ -328,14 +295,10 @@ int main()
 		switch (n)
 		{
 		case 1:
-			pipes.reserve(i);
-			pipes.push_back(AddPipe(--i));
-			i += 2;
+			pipes.push_back(AddPipe());
 			break;
 		case 2:
-			cs.reserve(j);
-			cs.push_back(AddCS(--j));
-			j += 2;
+			cs.push_back(AddCS());
 			break;
 		case 3:
 			ViewThat(pipes, cs);

@@ -17,6 +17,7 @@ public:
 	std::string name;
 
 	CCS();
-
+	int GetId();
+	void SetId(int& id);
 };
 

@@ -12,8 +12,8 @@ using namespace std;
 void menu()
 {
 	cout << "1. Add pipe" << endl << "2. Add compressor station" << endl << "3. Show objects" << endl 
-		<< "4. Edit pipe" << endl << "5. Edit compressor station" << endl
-		<< "6. Save to file" << endl << "7. Download from file" << endl << "0. Exit" << endl << endl;
+		<< "4. Edit pipe" << endl << "5. Edit compressor station" << endl << "6. Search by filter" << endl
+		<< "7. Save to file" << endl << "8. Download from file" << endl << "0. Exit" << endl << endl;
 }
 // +++++++++++++++++++++++=
 ostream& operator << (ostream& out, const vector<CCS>& cs)
@@ -34,22 +34,22 @@ ostream& operator << (ostream& out, const vector<CPipe>& p)
 	return out;
 } 
 // ???????
-ofstream& operator << (ofstream& fout, const vector<CCS>& cs)
+ofstream& operator << (ofstream& fout, vector<CCS>& cs)
 {
-	for (const CCS& c : cs)
+	for (CCS& c : cs)
 	{
 		fout.precision(2);
-		fout << c.id << endl << c.name << endl << c.totalShop << endl
+		fout << c.GetId() << endl << c.name << endl << c.totalShop << endl
 			<< c.workShop << endl << c.efficiency << endl << endl;
 	}
 	return fout;
 } 
 
-ofstream& operator << (ofstream& fout, const vector<CPipe>& pipes)
+ofstream& operator << (ofstream& fout, vector<CPipe>& pipes)
 {
-	for (const CPipe& p : pipes)
+	for (CPipe& p : pipes)
 	{
-		fout << p.id << endl << p.diametr << endl
+		fout << p.GetId() << endl << p.diametr << endl
 			<< p.length << endl << p.repair << endl << endl;
 	}
 	return fout;
@@ -58,7 +58,9 @@ ofstream& operator << (ofstream& fout, const vector<CPipe>& pipes)
 // как это в класс убрать
 ifstream& operator >> (ifstream& in, CPipe& p) // 
 {
-	in >> p.id;
+	int k;
+	in >> k;
+	p.SetId(k);
 	in >> p.diametr;
 	in >> p.length;
 	in >> p.repair;
@@ -77,7 +79,9 @@ ifstream& operator >> (ifstream& in, vector<CPipe>& pipes)
 
 ifstream& operator >> (ifstream& in, CCS& c)
 {
-	in >> c.id;
+	int id;
+	in >> id;
+	c.SetId(id);
 	in >> c.name;
 	in >> c.totalShop;
 	in >> c.workShop;
@@ -105,10 +109,10 @@ CCS AddCS()
 	getline(cin, r.name);
 
 	cout << "Enter the number of workshops - ";
-	r.totalShop = CheckNum(0, 1000, "Enter the number of workshops (enter correct value) - ");
+	r.totalShop = CheckNum(0, 1000);
 
 	cout << "Enter the number of workshop workers - ";
-	r.workShop = CheckNum(0, r.totalShop, "Enter the number of workshops  workers (enter correct value) - ");
+	r.workShop = CheckNum(0, r.totalShop);
 
 	srand(time(NULL));
 	r.efficiency = 1. / (rand() % 100);
@@ -124,10 +128,10 @@ CPipe AddPipe()
 	cout <<"Adding a pipe..." << endl;
 
 	cout << "Enter the diameter in millimeters - ";
-	p.diametr = CheckNum<double>(0, 10000, "Enter the diameter in millimeters (more zero and not letter) - ");
+	p.diametr = CheckNum<double>(0, 10000);
 
 	cout << "Enter the length in meters - ";
-	p.length = CheckNum<double>(0, 10000, "Enter the length in meters (more zero and not letter) - ");
+	p.length = CheckNum<double>(0, 10000);
 
 	cout << endl;
 	return p;
@@ -140,12 +144,12 @@ void EditPipe(vector<CPipe>& pipes)
 	cout << "Choose - ";
 	int id, u;
 	u = pipes.size() - 1; // Почему то если подставить сразу - выдает ошибку???
-	id = CheckNum(0, u, "Select an existing id ");
+	id = CheckNum(0, u);
 
 	cout << "0. The pipe is serviceable" << endl << "1. Pipe repair" << endl;
 	int choice;
 	cout << "Choose - ";
-	choice = CheckNum(0, 1, "Select 0 or 1 not otherwise - ");
+	choice = CheckNum(0, 1);
 
 
 	pipes[id].repair = choice;
@@ -159,25 +163,25 @@ void EditCs(vector<CCS>& cs)
 	cout << "Choose - ";
 	int id,u;
 	u = cs.size() - 1;
-	id = CheckNum(0, u, "Select an existing id ");
+	id = CheckNum(0, u);
 
 	cout << "0. Start the workshop" << endl << "1. Stop the workshop" << endl;
 	int choice;
 	cout << "Choose - ";
-	choice = CheckNum(0, 1, "Select 0 or 1 not otherwise - ");
+	choice = CheckNum(0, 1);
 
 
 	if (choice == 0 && (cs[id].totalShop > cs[id].workShop)) // сделать проверку ещё когда вывод всех объектов
 	{
 		cs[id].workShop += 1;// ternarn
 	}
-	else if (choice == 1)
+	else if (choice == 1 && cs[id].workShop > 0)
 	{
 		cs[id].workShop -= 1;
 	}
 	else
 	{
-		cout << "\nMaking more workshops impossible\n";
+		cout << "\nThis action is impossible \n";
 	}
 	cout << endl;
 }
@@ -186,7 +190,7 @@ void ViewThat(const vector<CPipe>& pipes, const vector<CCS>& cs)
 {
 	cout << "1. View all\n" << "2. View pipes\n" << "3. View compressor station\n";
 	int choise;
-	choise = CheckNum(1, 3, "Enter from 1 to 3\n");
+	choise = CheckNum(1, 3);
 	switch (choise)
 	{
 	case 1:
@@ -201,7 +205,7 @@ void ViewThat(const vector<CPipe>& pipes, const vector<CCS>& cs)
 		int OutPipe, u;
 		u = pipes.size(); // 4 byte like int sizeof
 		cout << "Select - ";
-		OutPipe = CheckNum(0, u, "Enter from existing pipes\n");
+		OutPipe = CheckNum(0, u);
 		cout << endl;
 		cout << pipes[OutPipe] << endl;
 		break;
@@ -212,7 +216,7 @@ void ViewThat(const vector<CPipe>& pipes, const vector<CCS>& cs)
 		int OutCs, u;
 		u = cs.size();
 		cout << "Select - ";
-		OutCs = CheckNum(0, u, "Enter from existing cs\n\n");
+		OutCs = CheckNum(0, u);
 		cout << endl;
 		cout << cs[OutCs] << endl;
 		break;
@@ -221,15 +225,15 @@ void ViewThat(const vector<CPipe>& pipes, const vector<CCS>& cs)
 
 }
 
-void SaveAll(const vector<CPipe>& pipes, const vector<CCS>& cs)
+void SaveAll( vector<CPipe>& pipes,  vector<CCS>& cs)// убрал const
 {
 	ofstream fout;
 
 	fout.open("Bogdan_LR1.txt", ios::out);
 	if (fout.is_open())
 	{
-		fout << pipes.size() << endl;
-		fout << cs.size() << endl;
+		fout << CPipe::CountP << endl;
+		fout << CCS::CountCs << endl;
 		fout << endl;
 
 		if (pipes.size() != 0 || cs.size() != 0)
@@ -274,6 +278,102 @@ void LoadAll(vector<CPipe>& pipes, vector<CCS>& cs)
 	{
 		cout << "Fail is not open" << endl << endl;
 	}
+	cout << "Data downloaded\n\n";
+}
+
+bool SearchById(CPipe& p, int param)
+{
+	return p.GetId() == param;
+}
+
+bool SearchByRepair(CPipe& p, int param)
+{
+	return p.repair == param - 1;
+}
+
+//template <typename T> почему нельзя использовать шаблоны 
+bool SearchByName(CCS& pc, string name)
+{
+	return pc.name == name;
+}
+//{
+//	if (T == CCS)
+//	{
+//		return pc.name == name;
+//	}
+//	else
+//	{
+//		// у трубы нет имени
+//	}
+//}
+
+template <typename N, typename C>
+void СonByFilter(vector<C>& vect, bool(*f)(C& p, N param), N param)
+{
+	for (C& i : vect)
+	{
+		if (f(i, param))
+		{
+			cout << endl << i;
+		}
+	}
+}
+//vector<int> SearchByFilter(vector<T>& vect, bool(*f)(CPipe& p, T param), T param)
+//{
+//	vector<int> res;
+//	int indx = 0;
+//	for (T& i : vect)
+//	{
+//		//if (i.repair == (status - 1))
+//		if (f(i, param))
+//		{
+//			res.push_back(indx);
+//		}
+//		indx++;
+//	}
+//	return res;
+//}
+
+
+void SearchByFilter(vector<CPipe>& pipes, vector<CCS>& cs)
+{
+	cout << "1. Search by pipes\n" << "2. Search by compressor stations\nSelect action - ";
+	if (CheckNum(1, 2) == 1)
+	{
+		cout << "\n1. By ID\n" << "2. By condition\nSelect action - ";
+		if (CheckNum(1, 2) == 1)
+		{
+			cout << "Enter ID: 0 - " << CPipe::CountP - 1 << endl << "Select ID - ";
+			СonByFilter(pipes, SearchById, CheckNum(0, CPipe::CountP - 1));
+		}
+		else
+		{
+			cout << "\n1. Working\n2. Unworking\nSelect action - ";
+			СonByFilter(pipes, SearchByRepair, CheckNum(1, 2));
+		}
+	}
+	else
+	{
+		cout << "\n1. By name\n" << "2. By percentage of unused workshops\nSelect action - ";
+		if (CheckNum(1, 2) == 1)
+		{
+			int counter = 0;
+			cout << "\nEnter a name from this list: ";
+			for (CCS& i : cs)
+			{
+				++counter;
+				cout << counter << "." << i.name << " ";
+			}
+			cout << "\nSelect - ";
+			string name;
+			cin >> name;
+			СonByFilter(cs, SearchByName, name);
+		}
+		else
+		{
+
+		}
+	}
 }
 
 int main()
@@ -286,10 +386,9 @@ int main()
 	while (true)
 	{
 		menu();
-
 		cout << "Selected action - ";
 		int n;
-		n = CheckNum(0, 7, "Selected action(enter correct value from 0 to 7) - ");
+		n = CheckNum(0, 7);
 		cout << endl;
 
 		switch (n)
@@ -324,9 +423,14 @@ int main()
 			}
 			break;
 		case 6:
+		{
+			SearchByFilter(pipes, cs);
+			break;
+		}
+		case 7:
 			SaveAll(pipes, cs);
 			break;
-		case 7:
+		case 8:
 			LoadAll(pipes, cs);
 			break;
 		case 0:
@@ -336,3 +440,4 @@ int main()
 	}
 	return 0;
 }
+

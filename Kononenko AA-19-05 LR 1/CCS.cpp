@@ -9,6 +9,16 @@ CCS::CCS()
 	CountCs++;
 }
 
+int CCS::GetId()
+{
+	return id;
+}
+
+void CCS::SetId(int& id)
+{
+	this->id = id;
+}
+
 std::ostream& operator << (std::ostream& out, const CCS& cs)
 {
 	out.precision(2);

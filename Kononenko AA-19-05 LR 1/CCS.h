@@ -6,11 +6,11 @@
 class CCS
 {
 	private:
+		int id;
 		friend std::ostream& operator << (std::ostream& out, const CCS& cs);
 	
 	public:
 		static int CountCs;
-		int id;
 		int totalShop, workShop;
 		float efficiency;
 		std::string name;

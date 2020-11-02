@@ -18,20 +18,36 @@ void ViewAllId(vector<C>& pc) // если бы не было одинакого метода GetId пришлось
 		if (counter == pc.size() - 1)
 			cout << i.GetId();
 		else
-			cout << i.GetId() << ",  "; // как убрать последнюю запятую
+			cout << i.GetId() << ",  ";
 		counter++;
 	}
-	cout << endl << endl;
+	cout << endl;
+}
+
+template<typename C>
+void ViewAllName(vector<C> pc)
+{
+	int counter = 0;
+	for (C& i : pc)
+	{
+		if (counter == pc.size() - 1)
+			cout << i.name;
+		else
+			cout << i.name << ",  ";
+		counter++;
+	}
+	cout << endl;
 }
 
 template <typename C>
 int CheckChoiceId(vector<C>& pc)
 {
-	int choice;
+	int choice = 0;
 	do
 	{
 		cout << "\nChoice ID - ";
 		cin >> choice;
+		cout << endl;
 		if (cin.fail())
 		{
 			cin.clear();
@@ -48,31 +64,41 @@ int CheckChoiceId(vector<C>& pc)
 	} while (true);
 }
 
+template<typename C>
+string CheckChoiceName(vector<C>& pc)
+{
+	string choice = "";
+	do
+	{
+		cout << "\nChoice Name - ";
+		cin >> choice;
+		for (C& i : pc)
+		{
+			if (choice == i.name)
+				return choice;
+		}
+	} while (true);
+}
+
 void menu()
 {
-	cout << "1. Add pipe" << endl << "2. Add compressor station" << endl << "3. Show objects" << endl 
+	cout << "1. Add pipe" << endl << "2. Add compressor station" << endl << "3. Show objects" << endl
 		<< "4. Edit pipe" << endl << "5. Edit compressor station" << endl << "6. Search by filter" << endl
-		<< "7. Delete object" << endl << "8. Save to file" << endl << "9. Download from file" << endl << "0. Exit" << endl << endl;
+		<< "7. Delete object" << endl << "8. Save to file" << endl << "9. Download from file" << endl
+		<< "0. Exit" << endl << endl << "Selected action - ";
+
 }
-// +++++++++++++++++++++++=
-ostream& operator << (ostream& out, const vector<CCS>& cs)
+
+template<typename C>
+ostream& operator << (ostream& out, const vector<C>& pc)
 {
-	for (const CCS& c : cs)
+	for (const C& i : pc)
 	{
-		out << c;
+		out << i;
 	}
 	return out;
-} 
-// +++++++++++++++
-ostream& operator << (ostream& out, const vector<CPipe>& p)
-{
-	for (const CPipe& pipe : p)
-	{
-		out << pipe;
-	}
-	return out;
-} 
-// ???????
+}
+
 ofstream& operator << (ofstream& fout, vector<CCS>& cs)
 {
 	for (CCS& c : cs)
@@ -83,7 +109,6 @@ ofstream& operator << (ofstream& fout, vector<CCS>& cs)
 	}
 	return fout;
 } 
-
 ofstream& operator << (ofstream& fout, vector<CPipe>& pipes)
 {
 	for (CPipe& p : pipes)
@@ -94,7 +119,6 @@ ofstream& operator << (ofstream& fout, vector<CPipe>& pipes)
 	return fout;
 }
 
-// как это в класс убрать
 ifstream& operator >> (ifstream& in, CPipe& p) // 
 {
 	int k;
@@ -106,16 +130,6 @@ ifstream& operator >> (ifstream& in, CPipe& p) //
 
 	return in;
 }
-
-ifstream& operator >> (ifstream& in, vector<CPipe>& pipes)
-{
-	for(CPipe& p : pipes)
-	{
-		in >> p;
-	}
-	return in;
-}
-
 ifstream& operator >> (ifstream& in, CCS& c)
 {
 	int id;
@@ -129,9 +143,10 @@ ifstream& operator >> (ifstream& in, CCS& c)
 	return in;
 }
 
-ifstream& operator >> (ifstream& in, vector<CCS>& cs)
+template <typename C>
+ifstream& operator >> (ifstream& in, vector<C>& pc)
 {
-	for (CCS& c : cs)
+	for (C& c : pc)
 	{
 		in >> c;
 	}
@@ -141,21 +156,17 @@ ifstream& operator >> (ifstream& in, vector<CCS>& cs)
 CCS AddCS()
 {
 	CCS r;
-	cout << "Adding a compressor station..." << endl;
-
-	cout << "Enter the name of the compressor station - " ;
+	cout << "Enter the name of the compressor station - ";
 	cin.ignore();
 	getline(cin, r.name);
 
 	cout << "Enter the number of workshops - ";
 	r.totalShop = CheckNum(0, 1000);
-
 	cout << "Enter the number of workshop workers - ";
 	r.workShop = CheckNum(0, r.totalShop);
 
 	srand(time(NULL));
-	r.efficiency = 1. / (rand() % 100);
-
+	r.efficiency = 1. / (rand() % 10);
 	cout << endl;
 	return r;
 }
@@ -163,22 +174,17 @@ CCS AddCS()
 CPipe AddPipe()
 {
 	CPipe p;
-
-	cout <<"Adding a pipe..." << endl;
-
-	cout << "Enter the diameter in millimeters - ";
+	cout << "\nEnter the diameter in millimeters - ";
 	p.diametr = CheckNum<double>(0, 10000);
-
 	cout << "Enter the length in meters - ";
 	p.length = CheckNum<double>(0, 10000);
-
 	cout << endl;
 	return p;
 } 
 
 void EditAllPipes(vector<CPipe>& pipes)
 {
-	cout << "0. The pipes is serviceable" << endl << "1. Pipes repair" << endl << "Choose - ";
+	cout << "0. The pipes is serviceable\n1. Pipes repair\nChoose - ";
 	int choice = CheckNum(0, 1);
 	cout << endl;
 	for (CPipe& i : pipes)
@@ -192,14 +198,14 @@ vector<CPipe> EditSeveralPipes(vector<CPipe>& pipes)
 	vector<int> res;
 	do
 	{
-		cout << "Id of the pipe you want to edit: ";// << 0 << " - " << pipes.size() - 1 << endl << "Choose - ";
+		cout << "Id of the pipe you want to edit: ";
 		ViewAllId(pipes);
 		int ch = CheckChoiceId(pipes);
-		res.push_back(ch); // проверка введенного числа с существующем id
+		res.push_back(ch);
 		cout << "\n1. To select one more pipe\n2. Enough\nSelect - ";
 	} while (CheckNum(1, 2) == 1);
 
-	cout << "\n0. The pipe is serviceable" << endl << "1. Pipe repair" << endl << "Choose - ";
+	cout << "\n0. The pipe is serviceable\n1. Pipe repair\nChoose - ";
 	int choice = CheckNum(0, 1);
 	for (int i : res) // как лучше так или через res.size()
 	{
@@ -229,22 +235,16 @@ vector<CCS> EditAllCs(vector<CCS>& cs)
 	cout << "\n0. Start the workshop\n1. Stop the workshop\nSelect - ";
 	int choice = CheckNum(0, 1);
 	cout << endl;
-
 	for (CCS& i : cs)
 	{
-		if (choice == 0 && (i.totalShop > i.workShop)) // сделать проверку ещё когда вывод всех объектов
+		if (choice == 0 && (i.totalShop > i.workShop)) 
 		{
-			i.workShop += 1;// ternarn
+			i.workShop += 1;
 		}
 		else if (i.workShop > 0)
 		{
 			i.workShop -= 1;
 		}
-		else
-		{
-			cout << "\nThis action is impossible \n";
-		}
-		cout << endl;
 	}
 	return cs;
 }
@@ -262,7 +262,6 @@ vector<CCS> EditSeveralCs(vector<CCS>& cs)
 	} while (CheckNum(1, 2) == 1);
 
 	cout << "\n0. Start the workshop\n1. Stop the workshop\nSelect - ";
-	cout << endl;
 	if (CheckNum(0, 1) == 0)
 	{
 		for (int i : res) // как лучше так или через res.size()
@@ -295,12 +294,6 @@ void EditCs(vector<CCS>& cs)
 		cout << endl;
 		EditSeveralCs(cs); // что лучше здесь метод или функция? что быстрее?
 	}
-	//cout << "Id of the compressor station you want to edit: " << 0 << " - " << cs.size()-1 << endl;
-
-	//cout << "Choose - ";
-	//int id,u;
-	//u = cs.size() - 1;
-	//id = CheckNum(0, u);
 }
 
 void ViewThat(vector<CPipe>& pipes, vector<CCS>& cs)
@@ -308,43 +301,39 @@ void ViewThat(vector<CPipe>& pipes, vector<CCS>& cs)
 	cout << "1. View all\n" << "2. View pipes\n" << "3. View compressor station\nSelect - ";
 	switch (CheckNum(1, 3))
 	{
-	case 1:
-	{
-		cout << endl;
-		cout << pipes;
-		cout << cs;
-		break;
-	}
-	case 2:
-	{
-		cout << "Select id you want to output: ";
-		ViewAllId(pipes);
-		int OutPipe;
-		OutPipe = CheckChoiceId(pipes);
-		cout << endl;
-		cout << pipes[OutPipe] << endl;
-		break;
-	}
-	case 3:
-	{
-		cout << "Select id you want to output: ";
-		ViewAllId(cs);
-		int OutCs;
-		OutCs = CheckChoiceId(cs);
-		cout << endl;
-		cout << cs[OutCs] << endl;
-		break;
-	}
+		case 1:
+		{
+			cout << endl;
+			cout << pipes;
+			cout << cs;
+			break;
+		}
+		case 2:
+		{
+			cout << "Select id you want to output: ";
+			ViewAllId(pipes);
+			int OutPipe = CheckChoiceId(pipes);
+			cout << pipes[OutPipe] << endl;
+			break;
+		}
+		case 3:
+		{
+			cout << "Select id you want to output: ";
+			ViewAllId(cs);
+			int OutCs;
+			OutCs = CheckChoiceId(cs);
+			cout << endl << cs[OutCs] << endl;
+			break;
+		}
 	}
 }
 
-void SaveAll( vector<CPipe>& pipes,  vector<CCS>& cs)// убрал const
+void SaveAll(vector<CPipe>& pipes, vector<CCS>& cs)
 {
 	ofstream fout;
 	string name;
 	cout << "Enter name fail: ";
 	cin >> name;
-	//fout.open("Bogdan_LR1.txt", ios::out);
 	fout.open(name, ios::out);
 	if (fout.is_open())
 	{
@@ -387,8 +376,7 @@ void LoadAll(vector<CPipe>& pipes, vector<CCS>& cs)
 		pipes.resize(lenpipe);
 		cs.resize(lencs);
 	/*	pipes.reserve(lenpipe);
-		cs.reserve(lencs);*/
-
+		cs.reserve(lencs);*/  ///////////// почему так не работает
 		fin >> pipes;
 		fin >> cs;
 		fin.close();
@@ -443,33 +431,19 @@ void СonByFilter(vector<C>& vect, bool(*f)(C& p, N param), N param)
 	}
 	cout << endl;
 }
-//vector<int> SearchByFilter(vector<T>& vect, bool(*f)(CPipe& p, T param), T param)
-//{
-//	vector<int> res;
-//	int indx = 0;
-//	for (T& i : vect)
-//	{
-//		//if (i.repair == (status - 1))
-//		if (f(i, param))
-//		{
-//			res.push_back(indx);
-//		}
-//		indx++;
-//	}
-//	return res;
-//}
+
 void SearchByFilter(vector<CPipe>& pipes, vector<CCS>& cs)
 {
-	cout << "1. Search by pipes\n" << "2. Search by compressor stations\nSelect action - ";
+	cout << "1. Search by pipes\n2. Search by compressor stations\nSelect action - ";
 	if (CheckNum(1, 2) == 1)
 	{
-		cout << "\n1. By ID\n" << "2. By condition\nSelect action - ";
+		cout << "\n1. By ID\n2. By condition\nSelect action - ";
 		if (CheckNum(1, 2) == 1)
 		{
 			cout << "Enter ID: ";
 			ViewAllId(pipes);
 			int ch = CheckChoiceId(pipes);
-			СonByFilter(pipes, SearchById,ch);
+			СonByFilter(pipes, SearchById, ch);
 		}
 		else
 		{
@@ -484,14 +458,8 @@ void SearchByFilter(vector<CPipe>& pipes, vector<CCS>& cs)
 		{
 			int counter = 0;
 			cout << "\nEnter a name from this list: ";
-			for (CCS& i : cs)
-			{
-				++counter;
-				cout << counter << "." << i.name << " ";
-			}
-			cout << "\nSelect - ";
-			string name;
-			cin >> name;
+			ViewAllName(cs);
+			string name = CheckChoiceName(cs);
 			СonByFilter(cs, SearchByName, name);
 		}
 		else
@@ -504,7 +472,7 @@ void SearchByFilter(vector<CPipe>& pipes, vector<CCS>& cs)
 
 void DeleteObject(vector <CPipe>& pipes,vector <CCS>& cs)
 {
-	cout << "1. Delete pipe\n" << "2. Delete compressor station\nSelect action - ";
+	cout << "1. Delete pipe\n2. Delete compressor station\nSelect action - ";
 	if (CheckNum(1, 2) == 1)
 	{
 		cout << "Enter ID: ";
@@ -526,60 +494,70 @@ void DeleteObject(vector <CPipe>& pipes,vector <CCS>& cs)
 int main()
 {
 	system("color 70");
-	cout << "\t\tKononenko Bogdan AA-19-05\n";
 	vector <CPipe> pipes;
 	vector <CCS> cs;
 
 	while (true)
 	{
 		menu();
-		cout << "Selected action - ";
-		int n;
-		n = CheckNum(0, 9);
-		cout << endl;
-
-		switch (n)
+		switch (CheckNum(0, 9))
 		{
-		case 1:
-			pipes.push_back(AddPipe());
-			break;
-		case 2:
-			cs.push_back(AddCS());
-			break;
-		case 3:
-			ViewThat(pipes, cs);
-			break;
-		case 4:
-			if (pipes.size() != 0)
-				EditPipe(pipes);
-			else
-				cout << "First, create a pipe ..." << endl << endl;
-			break;
-		case 5:
-			if (cs.size() != 0) 
-				EditCs(cs);
-			else
-				cout << "First, create a  compressor station ..." << endl << endl;
-			break;
-		case 6:
-		{
-			SearchByFilter(pipes, cs);
-			break;
-		}
-		case 7:
-		{
-			DeleteObject(pipes, cs);
-			break;
-		}
-		case 8:
-			SaveAll(pipes, cs);
-			break;
-		case 9:
-			LoadAll(pipes, cs);
-			break;
-		case 0:
-			return 0;
-			break;
+			case 1:
+			{
+				pipes.push_back(AddPipe());
+				break;
+			}
+			case 2:
+			{
+				cs.push_back(AddCS());
+				break;
+			}
+			case 3:
+			{
+				ViewThat(pipes, cs);
+				break;
+			}
+			case 4:
+			{
+				if (pipes.size() != 0)
+					EditPipe(pipes);
+				else
+					cout << "First, create a pipe ...\n\n";
+				break;
+			}
+			case 5:
+			{
+				if (cs.size() != 0)
+					EditCs(cs);
+				else
+					cout << "First, create a  compressor station ...\n\n";
+				break;
+			}
+			case 6:
+			{
+				SearchByFilter(pipes, cs);
+				break;
+			}
+			case 7:
+			{
+				DeleteObject(pipes, cs);
+				break;
+			}
+			case 8:
+			{
+				SaveAll(pipes, cs);
+				break;
+			}
+			case 9:
+			{
+				LoadAll(pipes, cs);
+				break;
+			}
+			case 0:
+			{
+				return 0;
+				break;
+			}
 		}
 	}
 	return 0;

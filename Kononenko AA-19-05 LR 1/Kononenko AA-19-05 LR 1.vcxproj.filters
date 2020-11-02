@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Pipes.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="CPipe.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
@@ -25,6 +22,9 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="Utils.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="LR.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

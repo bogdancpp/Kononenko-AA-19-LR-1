@@ -7,8 +7,7 @@ int CPipe::CountP = 0;
 
 CPipe::CPipe()
 {
-	id = CountP;
-	CountP++;
+	id = CountP++;
 }
 
 int CPipe::GetId()
@@ -16,12 +15,7 @@ int CPipe::GetId()
 	return id;
 }
 
-void CPipe::SetId(int& id)
-{
-	this->id = id;
-}
-
-std::string checkRepair(const CPipe& p)
+std::string checkRepair(const CPipe& p)//rename and class
 {
 	return (p.repair) ? "Unworking \n\n" : "Working \n\n";
 
@@ -34,12 +28,30 @@ std::ostream& operator << (std::ostream& out, const CPipe& p)
 	return out;
 }
 
-//std::ofstream& operator << (std::ofstream& fout, const CPipe& p) // не понимаю в чем проблема
-//{
-//	fout << p.id << endl << p.diametr << endl
-//			<< p.length << endl << p.repair << endl << endl;
-//
-//	return fout;
-//}
+std::ofstream& operator<<(std::ofstream& fout, const CPipe& p)
+{
+	fout << p.id << endl << p.diametr << endl
+		<< p.length << endl << p.repair << endl << endl;
+	return fout;
+}
+
+std::istream& operator>> (std::istream& in, CPipe& p)
+{
+	std::cout << "\nEnter the diameter in millimeters - ";
+	p.diametr = CheckNum<double>(0, 10000);
+	std::cout << "Enter the length in meters - ";
+	p.length = CheckNum<double>(0, 10000);
+	std::cout << endl;
+	return in;
+}
+
+std::ifstream& operator >> (ifstream& in, CPipe& p) //!!!!! 
+{
+	in >> p.id;
+	in >> p.diametr;
+	in >> p.length;
+	in >> p.repair;
+	return in;
+}
 
 

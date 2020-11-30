@@ -7,11 +7,12 @@
 #include "CCS.h"
 #include "Utils.h"
 #include <map>
+#include<unordered_map>
 
 using namespace std;
 
 template <typename C> 
-void ViewAllId(map<int, C>& pc) 
+void ViewAllId(unordered_map<int, C>& pc)
 {
 	bool is_first = true;
 	for (auto& i : pc) 
@@ -24,7 +25,7 @@ void ViewAllId(map<int, C>& pc)
 	cout << endl;
 }
 template<typename C>
-void ViewAllName( map<int, C>& pc)
+void ViewAllName(unordered_map<int, C>& pc)
 {
 	bool is_first = true;
 	for ( auto& i : pc)
@@ -38,7 +39,7 @@ void ViewAllName( map<int, C>& pc)
 }
 
 template <typename C>
-int CheckChoiceId(map<int, C>& pc)
+int CheckChoiceId(unordered_map<int, C>& pc)
 {
 	int choice = CheckNum(0, 100000);
 	do
@@ -55,7 +56,7 @@ int CheckChoiceId(map<int, C>& pc)
 // почему вызывается повтор? менял на while
 // почему на против while стоят воск знаки менял и туда и туда
 template<typename C>
-string CheckChoiceName(map<int,C>& pc)
+string CheckChoiceName(unordered_map<int,C>& pc)
 {
 	string choice = "";
 	do
@@ -84,7 +85,7 @@ void menu()
 }
 
 template<typename C>
-ostream& operator << (ostream& out, map<int , C>& object)
+ostream& operator << (ostream& out, unordered_map<int , C>& object)
 {
 	for ( auto& i : object)
 	{
@@ -93,7 +94,7 @@ ostream& operator << (ostream& out, map<int , C>& object)
 	return out;
 }
 template<typename C>
-ofstream& operator << (ofstream& fout, map<int, C>& object)
+ofstream& operator << (ofstream& fout, unordered_map<int, C>& object)
 {
 	for ( auto& i : object)
 	{
@@ -103,7 +104,7 @@ ofstream& operator << (ofstream& fout, map<int, C>& object)
 } 
 //библиотеки можно объявлеть только в хэдере а cpp не надо? 
 template <typename C>
-ifstream& operator >> (ifstream& in, map<int, C>& object)
+ifstream& operator >> (ifstream& in, unordered_map<int, C>& object)
 {
 	
 	for (auto& i : object)
@@ -113,7 +114,7 @@ ifstream& operator >> (ifstream& in, map<int, C>& object)
 	return in;
 }
 
-void EditAllPipes(map<int , CPipe>& pipes) 
+void EditAllPipes(unordered_map<int , CPipe>& pipes)
 {
 	cout << "0. The pipes is serviceable\n1. Pipes repair\nChoose - ";
 	int choice = CheckNum(0, 1);
@@ -123,7 +124,7 @@ void EditAllPipes(map<int , CPipe>& pipes)
 		i.second.repair = choice;
 	}
 }
-map<int, CPipe> EditSeveralPipes(map<int,CPipe>& pipes)
+unordered_map<int, CPipe> EditSeveralPipes(unordered_map<int,CPipe>& pipes)
 {
 	vector<int> res;
 	do
@@ -144,7 +145,7 @@ map<int, CPipe> EditSeveralPipes(map<int,CPipe>& pipes)
 	cout << endl;
 	return pipes;
 }
-void EditPipe(map<int, CPipe>& pipes)
+void EditPipe(unordered_map<int, CPipe>& pipes)
 {
 	cout << "1. Edit all existing ones\n2. Edit several by choice\nSelect - ";
 	if (CheckNum(1, 2) == 1)
@@ -160,7 +161,7 @@ void EditPipe(map<int, CPipe>& pipes)
 	}
 }
 
-map<int,CCS> EditAllCs(map<int,CCS>& cs)
+unordered_map<int,CCS> EditAllCs(unordered_map<int,CCS>& cs)
 {
 	cout << "\n0. Start the workshop\n1. Stop the workshop\nSelect - ";
 	int choice = CheckNum(0, 1);
@@ -178,7 +179,7 @@ map<int,CCS> EditAllCs(map<int,CCS>& cs)
 	}
 	return cs;
 }
-map<int,CCS> EditSeveralCs(map<int,CCS>& cs)
+unordered_map<int,CCS> EditSeveralCs(unordered_map<int,CCS>& cs)
 {
 	vector<int> res;
 	do
@@ -209,7 +210,7 @@ map<int,CCS> EditSeveralCs(map<int,CCS>& cs)
 	}
 	return cs;
 }
-void EditCs(map<int, CCS>& cs)
+void EditCs(unordered_map<int, CCS>& cs)
 {
 	cout << "1. Edit all existing ones\n2. Edit several by choice\nSelect - ";
 	if (CheckNum(1, 2) == 1)
@@ -224,7 +225,7 @@ void EditCs(map<int, CCS>& cs)
 	}
 }
 
-void ViewThat(map<int, CPipe>& pipes, map<int, CCS>& cs)
+void ViewThat(unordered_map<int, CPipe>& pipes, unordered_map<int, CCS>& cs)
 {
 	cout << "1. View all\n" << "2. View pipes\n" << "3. View compressor stations\nSelect - ";
 	switch (CheckNum(1, 3))
@@ -256,7 +257,7 @@ void ViewThat(map<int, CPipe>& pipes, map<int, CCS>& cs)
 	}
 }
 // что мы убираем ? 
-void SaveAll(map<int,CPipe>& pipes, map<int,CCS>& cs)
+void SaveAll(unordered_map<int,CPipe>& pipes, unordered_map<int,CCS>& cs)
 {
 	ofstream fout;
 	string name;
@@ -288,7 +289,7 @@ void SaveAll(map<int,CPipe>& pipes, map<int,CCS>& cs)
 	}
 }
 // что мы убираем?
-void LoadAll(map<int,CPipe>& pipes, map<int,CCS>& cs)
+void LoadAll(unordered_map<int,CPipe>& pipes, unordered_map<int,CCS>& cs)
 {
 	ifstream fin;
 	string name;
@@ -336,7 +337,7 @@ bool SearchByPercent(CCS& cs, int param)
 	return 100 * (1 - (1. * cs.workShop) / cs.totalShop) >= param;
 }
 template <typename N, typename C>
-void СonByFilter(map<int,C>& map, bool(*f)(C& p, N param), N param)
+void СonByFilter(unordered_map<int,C>& map, bool(*f)(C& p, N param), N param)
 {
 	for (auto& i : map)
 	{
@@ -347,7 +348,7 @@ void СonByFilter(map<int,C>& map, bool(*f)(C& p, N param), N param)
 	}
 	cout << endl;
 }
-void SearchByFilterPipes(map<int,CPipe>& pipes)
+void SearchByFilterPipes(unordered_map<int,CPipe>& pipes)
 {
 	cout << "\n1. By ID\n2. By condition\nSelect action - ";
 	if (CheckNum(1, 2) == 1)
@@ -363,7 +364,7 @@ void SearchByFilterPipes(map<int,CPipe>& pipes)
 		СonByFilter(pipes, SearchByRepair, CheckNum(1, 2));
 	}
 }
-void SearchByFilterCs(map<int,CCS>& cs)
+void SearchByFilterCs(unordered_map<int,CCS>& cs)
 {
 	cout << "\n1. By name\n" << "2. By percentage of unused workshops\nSelect action - ";
 	if (CheckNum(1, 2) == 1)
@@ -381,7 +382,7 @@ void SearchByFilterCs(map<int,CCS>& cs)
 	}
 }
 
-void DeleteObject(map <int,CPipe>& pipes,map <int,CCS>& cs)
+void DeleteObject(unordered_map <int,CPipe>& pipes, unordered_map <int,CCS>& cs)
 {
 	cout << "1. Delete pipe\n2. Delete compressor station\nSelect action - ";
 	if (CheckNum(1, 2) == 1)
@@ -405,8 +406,8 @@ void DeleteObject(map <int,CPipe>& pipes,map <int,CCS>& cs)
 int main()
 {
 	system("color 03");
-	map <int, CPipe> pipes;
-	map <int, CCS> cs;
+	unordered_map <int, CPipe> pipes;
+	unordered_map <int, CCS> cs;
 
 	while (true)
 	{
@@ -481,4 +482,3 @@ int main()
 	}
 	return 0;
 }
-

@@ -15,20 +15,20 @@ int CPipe::GetId()
 	return id;
 }
 
-std::string checkRepair(const CPipe& p)//rename and class
+std::string checkRepair( CPipe& p)//rename and class
 {
 	return (p.repair) ? "Unworking \n\n" : "Working \n\n";
 
 }
 
-std::ostream& operator << (std::ostream& out, const CPipe& p)
+std::ostream& operator << (std::ostream& out,  CPipe& p)
 {
 	out << "Pipe id: " << p.id << std::endl << "diametr: " << p.diametr << std::endl
 		<< "length: " << p.length << std::endl << "pipe condition: " << checkRepair(p);
 	return out;
 }
 
-std::ofstream& operator<<(std::ofstream& fout, const CPipe& p)
+std::ofstream& operator<<(std::ofstream& fout,  CPipe& p)
 {
 	fout << p.id << endl << p.diametr << endl
 		<< p.length << endl << p.repair << endl << endl;

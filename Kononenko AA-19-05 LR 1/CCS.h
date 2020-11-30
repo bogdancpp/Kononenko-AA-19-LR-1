@@ -16,10 +16,10 @@ class CCS
 		int totalShop, workShop;
 		float efficiency;
 		std::string name;
-		friend std::ostream& operator << (std::ostream& out, const CCS& cs);
+		friend std::ostream& operator << (std::ostream& out,  CCS& cs);
 		friend std::ifstream& operator >> (std::ifstream& in, CCS& c);
 		friend std::istream& operator >> (std::istream& in, CCS& cs);// почему как дружественный метод? в коде его нет
-		friend std::ofstream& operator << (std::ofstream& fout, const CCS& c);
+		friend std::ofstream& operator << (std::ofstream& fout,  CCS& c);
 
 		CCS();
 		int GetId();

@@ -6,67 +6,71 @@
 #include "CPipe.h"
 #include "CCS.h"
 #include "Utils.h"
+#include <map>
 
 using namespace std;
 
 template <typename C> 
-void ViewAllId(vector<C>& pc) 
+void ViewAllId(map<int, C>& pc) 
 {
 	bool is_first = true;
-	for (C& i : pc) 
+	for (auto& i : pc) 
 	{
 		if (!is_first)
 			cout << ", ";
-		cout << i.GetId();
+		cout << i.second.GetId();
 		is_first = false;
 	}
 	cout << endl;
 }
 template<typename C>
-void ViewAllName(const vector<C>& pc)
+void ViewAllName( map<int, C>& pc)
 {
 	bool is_first = true;
-	for (const C& i : pc)
+	for ( auto& i : pc)
 	{
 		if (!is_first)
 			cout << ", ";
-		cout << i.name;
+		cout << i.second.name;
 		is_first = false;
 	}
 	cout << endl;
 }
 
 template <typename C>
-int CheckChoiceId(vector<C>& pc)
+int CheckChoiceId(map<int, C>& pc)
 {
 	int choice = CheckNum(0, 100000);
 	do
 	{
-		for (C& i : pc)
+		for (auto& i : pc)
 		{
-			if (choice == i.GetId())
+			if (choice == i.second.GetId())
 				return choice;
 		}
 
 	} while (true);
 }
-//Стоит ли в range based for писать const & ? он сам автоматически это не делает?
-// почему вызывается повтор? // еду в поезде без интернета 
-// почему на против while стоят воск знаки, надо передлать в просто while?
+//Стоит ли в range based for писать const & ? 
+// почему вызывается повтор? менял на while
+// почему на против while стоят воск знаки менял и туда и туда
 template<typename C>
-string CheckChoiceName(const vector<C>& pc)
+string CheckChoiceName(map<int,C>& pc)
 {
 	string choice = "";
 	do
+	//{
+	//while (true)
 	{
 		cout << "\nChoice Name - ";
 		cin.ignore(100, '\n'); // почему вызывается повтор?
 		getline(cin, choice);
-		for (const C& i : pc) 
+		for (auto& i : pc) 
 		{
-			if (choice == i.name)
+			if (choice == i.second.name)
 				return choice;
 		}
+	//}
 	} while (true);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
@@ -80,45 +84,46 @@ void menu()
 }
 
 template<typename C>
-ostream& operator << (ostream& out, const vector<C>& object)// non pc
+ostream& operator << (ostream& out, map<int , C>& object)
 {
-	for (const C& i : object)
+	for ( auto& i : object)
 	{
-		out << i;
+		out << i.second;
 	}
 	return out;
 }
 template<typename C>
-ofstream& operator << (ofstream& fout,const vector<C>& object)
+ofstream& operator << (ofstream& fout, map<int, C>& object)
 {
-	for (const C& c : object)
+	for ( auto& i : object)
 	{
-		fout << c;
+		fout << i.second;
 	}
 	return fout;
 } 
-//библиотеки можно объявлеть только в хэдере а cpp не надо? //рубрика еду в поезде без интернета
+//библиотеки можно объявлеть только в хэдере а cpp не надо? 
 template <typename C>
-ifstream& operator >> (ifstream& in, vector<C>& object)
+ifstream& operator >> (ifstream& in, map<int, C>& object)
 {
-	for (C& c : object)
+	
+	for (auto& i : object)
 	{
-		in >> c;
+		in >> i.second;
 	}
 	return in;
 }
 
-void EditAllPipes(vector<CPipe>& pipes)
+void EditAllPipes(map<int , CPipe>& pipes) 
 {
 	cout << "0. The pipes is serviceable\n1. Pipes repair\nChoose - ";
 	int choice = CheckNum(0, 1);
 	cout << endl;
-	for (CPipe& i : pipes)
+	for (pair<int const,CPipe>& i : pipes) 
 	{
-		i.repair = choice;
+		i.second.repair = choice;
 	}
 }
-vector<CPipe> EditSeveralPipes(vector<CPipe>& pipes)
+map<int, CPipe> EditSeveralPipes(map<int,CPipe>& pipes)
 {
 	vector<int> res;
 	do
@@ -139,7 +144,7 @@ vector<CPipe> EditSeveralPipes(vector<CPipe>& pipes)
 	cout << endl;
 	return pipes;
 }
-void EditPipe(vector<CPipe>& pipes)
+void EditPipe(map<int, CPipe>& pipes)
 {
 	cout << "1. Edit all existing ones\n2. Edit several by choice\nSelect - ";
 	if (CheckNum(1, 2) == 1)
@@ -155,25 +160,25 @@ void EditPipe(vector<CPipe>& pipes)
 	}
 }
 
-vector<CCS> EditAllCs(vector<CCS>& cs)
+map<int,CCS> EditAllCs(map<int,CCS>& cs)
 {
 	cout << "\n0. Start the workshop\n1. Stop the workshop\nSelect - ";
 	int choice = CheckNum(0, 1);
 	cout << endl;
-	for (CCS& i : cs)
+	for (pair<int const,CCS>& i : cs)
 	{
-		if (choice == 0 && (i.totalShop > i.workShop)) 
+		if (choice == 0 && (i.second.totalShop > i.second.workShop)) 
 		{
-			i.workShop += 1;
+			i.second.workShop += 1;
 		}
-		else if (i.workShop > 0)
+		else if (i.second.workShop > 0)
 		{
-			i.workShop -= 1;
+			i.second.workShop -= 1;
 		}
 	}
 	return cs;
 }
-vector<CCS> EditSeveralCs(vector<CCS>& cs)
+map<int,CCS> EditSeveralCs(map<int,CCS>& cs)
 {
 	vector<int> res;
 	do
@@ -188,9 +193,9 @@ vector<CCS> EditSeveralCs(vector<CCS>& cs)
 	cout << "\n0. Start the workshop\n1. Stop the workshop\nSelect - ";
 	if (CheckNum(0, 1) == 0)
 	{
-		for (int i : res) // как лучше так или через res.size()
+		for (int i : res)
 		{
-			if (cs[i].totalShop > cs[i].workShop)//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			if (cs[i].totalShop > cs[i].workShop)
 				cs[i].workShop += 1;
 		}
 	}
@@ -204,22 +209,22 @@ vector<CCS> EditSeveralCs(vector<CCS>& cs)
 	}
 	return cs;
 }
-void EditCs(vector<CCS>& cs)
+void EditCs(map<int, CCS>& cs)
 {
 	cout << "1. Edit all existing ones\n2. Edit several by choice\nSelect - ";
 	if (CheckNum(1, 2) == 1)
 	{
 		cout << endl;
-		EditAllCs(cs); // что лучше здесь метод или функция? что быстрее?
+		EditAllCs(cs);
 	}
 	else
 	{
 		cout << endl;
-		EditSeveralCs(cs); // что лучше здесь метод или функция? что быстрее?
+		EditSeveralCs(cs);
 	}
 }
 
-void ViewThat(vector<CPipe>& pipes, vector<CCS>& cs)
+void ViewThat(map<int, CPipe>& pipes, map<int, CCS>& cs)
 {
 	cout << "1. View all\n" << "2. View pipes\n" << "3. View compressor stations\nSelect - ";
 	switch (CheckNum(1, 3))
@@ -251,7 +256,7 @@ void ViewThat(vector<CPipe>& pipes, vector<CCS>& cs)
 	}
 }
 // что мы убираем ? 
-void SaveAll(vector<CPipe>& pipes, vector<CCS>& cs)
+void SaveAll(map<int,CPipe>& pipes, map<int,CCS>& cs)
 {
 	ofstream fout;
 	string name;
@@ -283,7 +288,7 @@ void SaveAll(vector<CPipe>& pipes, vector<CCS>& cs)
 	}
 }
 // что мы убираем?
-void LoadAll(vector<CPipe>& pipes, vector<CCS>& cs)
+void LoadAll(map<int,CPipe>& pipes, map<int,CCS>& cs)
 {
 	ifstream fin;
 	string name;
@@ -297,10 +302,14 @@ void LoadAll(vector<CPipe>& pipes, vector<CCS>& cs)
 		int lenpipe, lencs;
 		fin >> lenpipe;
 		fin >> lencs;
-		pipes.resize(lenpipe);
-		cs.resize(lencs);
-		fin >> pipes;
-		fin >> cs;
+		for (size_t i = 0; i < lenpipe; i++)
+		{
+			fin >> pipes[i];
+		}
+		for (size_t i = 0; i < lencs; i++)
+		{
+			fin >> cs[i];
+		}
 		fin.close();
 		cout << "Data downloaded\n\n";
 	}
@@ -327,18 +336,18 @@ bool SearchByPercent(CCS& cs, int param)
 	return 100 * (1 - (1. * cs.workShop) / cs.totalShop) >= param;
 }
 template <typename N, typename C>
-void СonByFilter(vector<C>& vect, bool(*f)(C& p, N param), N param)
+void СonByFilter(map<int,C>& map, bool(*f)(C& p, N param), N param)
 {
-	for (C& i : vect)
+	for (auto& i : map)
 	{
-		if (f(i, param))
+		if (f(i.second, param))
 		{
-			cout << endl << i;
+			cout << endl << i.second;
 		}
 	}
 	cout << endl;
 }
-void SearchByFilterPipes(vector<CPipe>& pipes)
+void SearchByFilterPipes(map<int,CPipe>& pipes)
 {
 	cout << "\n1. By ID\n2. By condition\nSelect action - ";
 	if (CheckNum(1, 2) == 1)
@@ -354,7 +363,7 @@ void SearchByFilterPipes(vector<CPipe>& pipes)
 		СonByFilter(pipes, SearchByRepair, CheckNum(1, 2));
 	}
 }
-void SearchByFilterCs(vector<CCS>& cs)
+void SearchByFilterCs(map<int,CCS>& cs)
 {
 	cout << "\n1. By name\n" << "2. By percentage of unused workshops\nSelect action - ";
 	if (CheckNum(1, 2) == 1)
@@ -372,7 +381,7 @@ void SearchByFilterCs(vector<CCS>& cs)
 	}
 }
 
-void DeleteObject(vector <CPipe>& pipes,vector <CCS>& cs)
+void DeleteObject(map <int,CPipe>& pipes,map <int,CCS>& cs)
 {
 	cout << "1. Delete pipe\n2. Delete compressor station\nSelect action - ";
 	if (CheckNum(1, 2) == 1)
@@ -380,8 +389,7 @@ void DeleteObject(vector <CPipe>& pipes,vector <CCS>& cs)
 		cout << "Enter ID: ";
 		ViewAllId(pipes);
 		int ch = CheckChoiceId(pipes);
-		vector<CPipe>::iterator it1 = pipes.begin() + ch;
-		pipes.erase(it1);    // https://ru.cppreference.com/w/cpp/container/vector/erase
+		pipes.erase(ch); 
 		cout << endl;
 	}
 	else
@@ -389,18 +397,16 @@ void DeleteObject(vector <CPipe>& pipes,vector <CCS>& cs)
 		cout << "Enter ID: ";
 		ViewAllId(cs);
 		int ch = CheckChoiceId(cs);
-		auto it2 = cs.begin() + ch;
-		cs.erase(it2);
+		cs.erase(ch);
 		cout << endl;
 	}
 }
 
-// case 1 и 2 см ?
 int main()
 {
 	system("color 03");
-	vector <CPipe> pipes;
-	vector <CCS> cs;
+	map <int, CPipe> pipes;
+	map <int, CCS> cs;
 
 	while (true)
 	{
@@ -409,18 +415,16 @@ int main()
 		{
 			case 1:
 			{
-				//pipes.push_back(AddPipe()); // Почему так вам не нравится?
 				CPipe p;
 				cin >> p;
-				pipes.push_back(p);
+				pipes.emplace(p.GetId(), p);
 				break;
 			}
 			case 2:
 			{
-				//cs.push_back(AddCS()); // вопрос выше
 				CCS c;
 				cin >> c;
-				cs.push_back(c);
+				cs.emplace(c.GetId(), c);
 				break;
 			}
 			case 3:

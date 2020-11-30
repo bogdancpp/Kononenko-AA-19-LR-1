@@ -14,7 +14,7 @@ int CCS::GetId()
 	return id;
 }
 
-std::ostream& operator << (std::ostream& out, const CCS& cs)
+std::ostream& operator << (std::ostream& out,  CCS& cs)
 {
 	out.precision(2);
 	out << "\nCS id: " << cs.id << std::endl << "Name: " << cs.name
@@ -27,7 +27,8 @@ std::ostream& operator << (std::ostream& out, const CCS& cs)
 std::ifstream& operator >> (std::ifstream& in, CCS& c)
 {
 	in >> c.id;
-	in >> c.name;
+	in.ignore();
+	std::getline(in, c.name);
 	in >> c.totalShop;
 	in >> c.workShop;
 	in >> c.efficiency;
@@ -52,7 +53,7 @@ std::istream& operator>>(std::istream& in, CCS& cs)
 	return in;
 }
 
-std::ofstream& operator<<(std::ofstream& fout, const CCS& c)
+std::ofstream& operator<<(std::ofstream& fout,  CCS& c)
 {
 	fout.precision(2);
 	fout << c.id << endl << c.name << endl << c.totalShop << endl

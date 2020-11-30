@@ -14,11 +14,11 @@ class CPipe
 		static int CountP;
 		float diametr, length;
 		bool repair = false;
-		friend std::ostream& operator << (std::ostream& out, const CPipe& p);  
+		friend std::ostream& operator << (std::ostream& out,  CPipe& p);  
 		friend std::ifstream& operator >> (std::ifstream& in, CPipe& p); 
-		friend std::ofstream& operator << (std::ofstream& fout, const CPipe& p);
+		friend std::ofstream& operator << (std::ofstream& fout,  CPipe& p);
 		friend std::istream& operator >> (std::istream& in, CPipe& p); // почему  должен его объ€вл€ть как дружественный метод
-		friend std::string checkRepair(const CPipe& p);
+		friend std::string checkRepair( CPipe& p);
 
 		CPipe();
 		int GetId();

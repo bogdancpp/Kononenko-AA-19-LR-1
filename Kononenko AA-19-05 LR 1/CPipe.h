@@ -14,6 +14,8 @@ class CPipe
 		static int CountP;
 		float diametr, length;
 		bool repair = false;
+		int begin = -1;
+		int end = -1;
 		friend std::ostream& operator << (std::ostream& out,  CPipe& p);  
 		friend std::ifstream& operator >> (std::ifstream& in, CPipe& p); 
 		friend std::ofstream& operator << (std::ofstream& fout,  CPipe& p);

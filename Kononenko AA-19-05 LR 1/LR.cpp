@@ -6,8 +6,10 @@
 #include "CPipe.h"
 #include "CCS.h"
 #include "Utils.h"
-#include <map>
-#include<unordered_map>
+#include <unordered_map>
+#include <stack>
+#include "LR.h"
+#include <deque>
 
 using namespace std;
 
@@ -39,17 +41,19 @@ void ViewAllName(unordered_map<int, C>& pc)
 }
 
 template <typename C>
-int CheckChoiceId(unordered_map<int, C>& pc)
+int CheckChoiceId(unordered_map<int, C>& object)
 {
-	int choice = CheckNum(0, 100000);
 	do
 	{
-		for (auto& i : pc)
+		cout << "select - ";
+		int choice = CheckNum(0, 100000);
+		for (auto& i : object)
 		{
 			if (choice == i.second.GetId())
 				return choice;
+			else
+				continue;
 		}
-
 	} while (true);
 }
 //Стоит ли в range based for писать const & ? 
@@ -77,10 +81,10 @@ string CheckChoiceName(unordered_map<int,C>& pc)
 
 void menu()
 {
-	cout << "1. Add pipe" << endl << "2. Add compressor station" << endl << "3. Show objects" << endl
+	cout << "\n1. Add pipe" << endl << "2. Add compressor station" << endl << "3. Show objects" << endl
 		<< "4. Edit pipe" << endl << "5. Edit compressor station" << endl << "6. Search by filter" << endl
 		<< "7. Delete object" << endl << "8. Save to file" << endl << "9. Download from file" << endl
-		<< "0. Exit" << endl << endl << "Selected action - ";
+		<< "0. Exit mode" << endl << endl << "Selected action - ";
 
 }
 
@@ -403,81 +407,351 @@ void DeleteObject(unordered_map <int,CPipe>& pipes, unordered_map <int,CCS>& cs)
 	}
 }
 
+void ModeMenu() 
+{
+	cout << "\n1. CRUD mode\n2. Graph mode\n0. Exit program\nSelect - ";
+}
+void MenuGraph()
+{
+	cout << "\n1. Build graph\n2. Perform topological sorting\n0. Exit mode\nSelect - ";
+}
+
+void ViewMatrix(int** matrix, int size)
+{
+	cout << "\nMatrix state\n\n";
+	for (int i = 0; i < size; i++)
+	{
+		for (int j = 0; j < size; j++)
+		{
+			cout <<  matrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+}
+void SearchUselessNodes(int** matrix, int size,vector<int>& useless)
+{
+	cout << "\n1. Search for unused nodes: ";
+	int t = 1;
+	for (size_t i = 0; i < size; i++)
+	{
+		t = 1;
+		for (size_t j = 0; j < size; j++)
+		{
+			if (matrix[i][j] == 0)
+				t *= 1;
+			else
+				t *= 0;
+		}
+		if (t == 1)
+		{
+			useless.push_back(i);
+		}
+	}
+	for (int i : useless)
+		cout << i << " ";
+	cout << endl;
+}
+int SearchZeroHalfStepNodes(int** matrix, int size)
+{
+	cout << "2. Search for the first vertex with a zero half-step of the outcome: ";
+	int SumRow = 0;
+	int result = 0;
+	vector <int>Included;
+	for (size_t i = 0; i < size; i++)
+	{
+		SumRow = 0;
+		Included.clear();
+		for (size_t j = 0; j < size; j++)
+		{
+			SumRow += matrix[i][j];
+			if (matrix[i][j] < 0)
+			{
+				Included.push_back(j);// не здесь инкллюд и не тот 
+			}
+		}
+		if (SumRow < 0)
+		{
+			result = i;
+			break;
+		}
+	}
+	if (Included.empty())
+	{
+		return result = -100;
+	}
+	cout << result << endl;
+	cout << "3. Delete all connection" << endl;
+	for (size_t j = 0; j < size; j++)
+	{
+		matrix[result][j] = 0;
+	}
+	for (int i : Included)
+	{
+		matrix[i][result] = 0;
+	}
+	return result;
+}
+void ClearDiagonal(int** matrix, int size)
+{
+	for (size_t i = 0; i < size; i++)
+	{
+		matrix[i][i] = 0;
+	}
+}
+bool ZeroMatrix(int** matrix, int size)
+{
+	int t = 1;
+	for (size_t i = 0; i < size; i++)
+	{
+		for (size_t j = 0; j < size; j++)
+		{
+			if (matrix[i][j] == 0)
+				t *= 1;
+			else
+				t *= 0;
+		}
+	}
+	return t;
+}
+int LastNode(int** matrix, int size,vector<int> useless, deque<int>nodes)//можно было по ссылке сделать
+{
+	int result = -1;
+	int k = 1;
+	for (size_t i = 0; i < size; i++)
+	{
+		k = 1;
+		for (int j : useless)
+		{
+			if (i != j)
+				k *= 1;
+			else
+				k *= 0;
+		}
+		for (int l : nodes)
+		{
+			if (i != l)
+				k *= 1;
+			else
+				k *= 0;
+		}
+		if (k == 1)
+			result = i;
+	}
+	return result;
+}
+void ZeroizeMatrix(int** matrix, int size)
+{
+	for (size_t i = 0; i < size; i++)
+	{
+		for (size_t j = 0; j < size; j++)
+		{
+			matrix[i][j] = 0;
+		}
+
+	}
+}
+
 int main()
 {
 	system("color 03");
 	unordered_map <int, CPipe> pipes;
 	unordered_map <int, CCS> cs;
-
 	while (true)
 	{
-		menu();
-		switch (CheckNum(0, 9))
+		bool CRUD = true;
+		bool graph = true;
+		ModeMenu();
+		switch (CheckNum(0, 2))
 		{
-			case 1:
+		case 1:
+		{
+			while (CRUD)
 			{
-				CPipe p;
-				cin >> p;
-				pipes.emplace(p.GetId(), p);
-				break;
+				menu();
+				switch (CheckNum(0, 9))
+				{
+				case 1:
+				{
+					CPipe p;
+					cin >> p;
+					pipes.emplace(p.GetId(), p);
+					break;
+				}
+				case 2:
+				{
+					CCS c;
+					cin >> c;
+					cs.emplace(c.GetId(), c);
+					break;
+				}
+				case 3:
+				{
+					ViewThat(pipes, cs);
+					break;
+				}
+				case 4:
+				{
+					if (pipes.size() != 0)
+						EditPipe(pipes);
+					else
+						cout << "First, create a pipe ...\n\n";
+					break;
+				}
+				case 5:
+				{
+					if (cs.size() != 0)
+						EditCs(cs);
+					else
+						cout << "First, create a  compressor station ...\n\n";
+					break;
+				}
+				case 6:
+				{
+					cout << "1. Search by pipes\n2. Search by compressor stations\nSelect action - ";
+					if (CheckNum(1, 2) == 1)
+						SearchByFilterPipes(pipes);
+					else
+						SearchByFilterCs(cs);
+					break;
+				}
+				case 7:
+				{
+					DeleteObject(pipes, cs);
+					break;
+				}
+				case 8:
+				{
+					SaveAll(pipes, cs);
+					break;
+				}
+				case 9:
+				{
+					LoadAll(pipes, cs);
+					break;
+				}
+				case 0:
+				{
+					CRUD = false;
+					break;
+				}
+				}
+
 			}
-			case 2:
+			break;
+		}
+		case 2:
+		{
+			int NumberNodes = cs.size();
+			int** matrix = new int* [NumberNodes];
+			vector<int> useless;
+			deque<int> nodes; 
+			for (int i = 0; i < NumberNodes; i++) // вынести в отдельный метод
 			{
-				CCS c;
-				cin >> c;
-				cs.emplace(c.GetId(), c);
-				break;
+				matrix[i] = new int[NumberNodes];
+				for (int j = 0; j < NumberNodes; j++)
+				{
+					matrix[i][j] = 0;
+				}
 			}
-			case 3:
+			while (graph)
 			{
-				ViewThat(pipes, cs);
-				break;
+				MenuGraph();
+				switch (CheckNum(0, 2))
+				{
+				case 1:
+				{
+					bool repeat = true;
+					while (repeat)
+					{
+						pair<int, int> n;//знаю что пара ненужна просто чет захотелось 
+						cout << "Connecting nodes...\nWhat kind of pipe to connect\nList id pipes: ";
+						//ViewAllId(pipes);
+						/*bool repeat2 = false;
+						int res;
+						do
+						{
+							repeat2 = false;
+							res = CheckChoiceId(pipes);
+							if (!(pipes[res].begin == -1 && pipes[res].end == -1))
+							{
+								repeat2 = true;
+							}
+						} while (repeat2);*/
+						cout << "List id CS: ";
+						ViewAllId(cs);
+						cout << "From ";
+						n.first = CheckChoiceId(cs);
+						//pipes[res].begin = n.first;
+						cout << "Where ";
+						n.second = CheckChoiceId(cs);
+						//pipes[res].end = n.second;
+						matrix[n.first][n.second] = 1;
+						matrix[n.second][n.first] = -1;
+						ViewMatrix(matrix, NumberNodes);
+						cout << "\nExit?\n1. Yes\n2. No\nSelect - ";
+						if (CheckNum(1, 2) == 1)
+						{
+							repeat = false;
+						}
+					}
+					break;
+				}
+				case 2:
+				{
+					cout << "\nTopological sorting...\n";
+					ClearDiagonal(matrix, NumberNodes);
+					SearchUselessNodes(matrix, NumberNodes, useless);
+					bool loop = true;
+					while ((!ZeroMatrix(matrix, NumberNodes)) && loop)
+					{
+						int res = 0;
+						res = SearchZeroHalfStepNodes(matrix, NumberNodes);
+						if (res == -100)
+						{
+							cout << "\nThe graph contains a loop\n";
+							loop = false;
+						}
+						else
+						{
+						nodes.push_back(res);
+						ViewMatrix(matrix, NumberNodes);
+						cout << "\n3. If the matrix is nonzero do point 2\n";
+						}
+					}
+					if (loop)
+					{
+						nodes.push_back(LastNode(matrix, NumberNodes, useless, nodes));
+						cout << "Else answer: ";
+						cout << "Result topological sorting: \n";
+						int i = 1;
+						while (!nodes.empty())
+						{
+							cout << i << " - " << nodes.back() << " " << endl;
+							nodes.pop_back();
+							++i;
+						}
+					}
+					else
+					{
+						ZeroizeMatrix(matrix, NumberNodes);
+					}
+					break;
+				}
+				case 0:
+				{
+					graph = false;
+					break;
+				}
+				}
 			}
-			case 4:
-			{
-				if (pipes.size() != 0)
-					EditPipe(pipes);
-				else
-					cout << "First, create a pipe ...\n\n";
-				break;
-			}
-			case 5:
-			{
-				if (cs.size() != 0)
-					EditCs(cs);
-				else
-					cout << "First, create a  compressor station ...\n\n";
-				break;
-			}
-			case 6:
-			{
-				cout << "1. Search by pipes\n2. Search by compressor stations\nSelect action - ";
-				if (CheckNum(1, 2) == 1)
-					SearchByFilterPipes(pipes);
-				else
-					SearchByFilterCs(cs);
-				break;
-			}
-			case 7:
-			{
-				DeleteObject(pipes, cs);
-				break;
-			}
-			case 8:
-			{
-				SaveAll(pipes, cs);
-				break;
-			}
-			case 9:
-			{
-				LoadAll(pipes, cs);
-				break;
-			}
-			case 0:
-			{
-				return 0;
-				break;
-			}
+			delete[] matrix;
+			break;
+		}
+		case 0:
+		{
+			return 0;
+			break;
+		}
 		}
 	}
 	return 0;

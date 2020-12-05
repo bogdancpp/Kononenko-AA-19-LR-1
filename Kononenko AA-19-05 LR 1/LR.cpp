@@ -10,6 +10,7 @@
 #include <stack>
 #include "LR.h"
 #include <deque>
+#include "GTNet.h"
 
 using namespace std;
 
@@ -641,6 +642,7 @@ int main()
 		}
 		case 2:
 		{
+			GTNet connect;
 			int NumberNodes = cs.size();
 			int** matrix = new int* [NumberNodes];
 			vector<int> useless;
@@ -663,10 +665,10 @@ int main()
 					bool repeat = true;
 					while (repeat)
 					{
-						pair<int, int> n;//знаю что пара ненужна просто чет захотелось 
+						pair<int, int> InOutPipe;
 						cout << "Connecting nodes...\nWhat kind of pipe to connect\nList id pipes: ";
-						//ViewAllId(pipes);
-						/*bool repeat2 = false;
+						ViewAllId(pipes);
+						bool repeat2 = false;
 						int res;
 						do
 						{
@@ -676,18 +678,22 @@ int main()
 							{
 								repeat2 = true;
 							}
-						} while (repeat2);*/
+						} while (repeat2);
 						cout << "List id CS: ";
 						ViewAllId(cs);
 						cout << "From ";
-						n.first = CheckChoiceId(cs);
+						InOutPipe.first = CheckChoiceId(cs);
 						//pipes[res].begin = n.first;
 						cout << "Where ";
-						n.second = CheckChoiceId(cs);
+						InOutPipe.second = CheckChoiceId(cs);
+						connect.InOutPipes.emplace(res, InOutPipe);
+						connect.FillingIncidentMatrix();
+						system("pause");
 						//pipes[res].end = n.second;
-						matrix[n.first][n.second] = 1;
-						matrix[n.second][n.first] = -1;
+						matrix[InOutPipe.first][InOutPipe.second] = 1;
+						matrix[InOutPipe.second][InOutPipe.first] = -1;
 						ViewMatrix(matrix, NumberNodes);
+
 						cout << "\nExit?\n1. Yes\n2. No\nSelect - ";
 						if (CheckNum(1, 2) == 1)
 						{
@@ -713,9 +719,9 @@ int main()
 						}
 						else
 						{
-						nodes.push_back(res);
-						ViewMatrix(matrix, NumberNodes);
-						cout << "\n3. If the matrix is nonzero do point 2\n";
+							nodes.push_back(res);
+							ViewMatrix(matrix, NumberNodes);
+							cout << "\n3. If the matrix is nonzero do point 2\n";
 						}
 					}
 					if (loop)

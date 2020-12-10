@@ -146,7 +146,15 @@ int GazTransNet::SearchZeroHalfStepNodes(const vector<int>& nodes, deque<int> To
 		}
 		else
 		{
-			if (k == 1 && i != TopologicNodes.back())
+			int q = 1;
+			for (const int& t : TopologicNodes)
+			{
+				if (i != t)
+					q *= 1;
+				else
+					q *= 0;
+			}
+			if (k == 1 && q == 1)
 			{
 				index = i;
 				break;

@@ -113,11 +113,10 @@ bool GazTransNet::ZeroMatrix(const int& size)
 	return t;
 }
 
-int GazTransNet::SearchZeroHalfStepNodes(const vector<int>& nodes)
+int GazTransNet::SearchZeroHalfStepNodes(const vector<int>& nodes, deque<int> TopologicNodes)
 {
 	int size = nodes.size();
 	std::cout << "2. Search for the first vertex with a zero half-step of the outcome: ";
-	int SumRow = 0;
 	int addNode = 0;
 	int index = -1;
 	int k = 1;
@@ -125,7 +124,6 @@ int GazTransNet::SearchZeroHalfStepNodes(const vector<int>& nodes)
 	for (size_t i = 0; i < size; i++)
 	{
 		k = 1;
-		SumRow = 0;
 		Included.clear();
 		for (size_t j = 0; j < size; j++)
 		{
@@ -133,16 +131,26 @@ int GazTransNet::SearchZeroHalfStepNodes(const vector<int>& nodes)
 				k *= 1;
 			else
 				k *= 0;
-			SumRow += matrix[i][j];
 			if (matrix[i][j] < 0)
 			{
 				Included.push_back(j);// не здесь инкллюд и не тот 
 			}
 		}
-		if (k == 1)
+		if (TopologicNodes.empty())
 		{
-			index = i;
-			break;
+			if (k == 1)
+			{
+				index = i;
+				break;
+			}
+		}
+		else
+		{
+			if (k == 1 && i != TopologicNodes.back())
+			{
+				index = i;
+				break;
+			}
 		}
 	}
 
@@ -230,7 +238,8 @@ void GazTransNet::TopologicalSorting(const unordered_map<int, CPipe>& pipes)
 
 	}
 
-	int size = nodes.size();
+	//int size = nodes.size();
+	size = nodes.size();
 	matrix = new int* [size];// создание матрицы и заполнение нулями
 	for (size_t i = 0; i < size; i++)
 	{
@@ -254,7 +263,7 @@ void GazTransNet::TopologicalSorting(const unordered_map<int, CPipe>& pipes)
 	while ((!ZeroMatrix(size)) && loop)// пока матрица не нулевая и нет цикла
 	{
 		addNode = 0;
-		addNode = SearchZeroHalfStepNodes(nodes);// ищем 0-ую степень исхода
+		addNode = SearchZeroHalfStepNodes(nodes, TopologicNodes);// ищем 0-ую степень исхода
 		ViewMatrix(nodes);
 		if (addNode == -100)
 		{
@@ -315,7 +324,7 @@ GazTransNet::GazTransNet()
 {
 	matrix = new int* [size];
 	for (int i = 0; i < size; i++)
-		matrix[i] = new int[1];
+		matrix[i] = new int[size];
 }
 
 GazTransNet::~GazTransNet()

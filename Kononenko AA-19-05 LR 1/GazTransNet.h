@@ -20,6 +20,6 @@ private:
 	void ViewMatrix(const vector<int>& nodes);
 	void FillingMatrix(const vector<pair<int, int>>& InOut, const vector<int>& nodes);
 	bool ZeroMatrix(const int& size);
-	int SearchZeroHalfStepNodes(const vector<int>& nodes);
+	int SearchZeroHalfStepNodes(const vector<int>& nodes, deque<int> TopologicNodes);
 };
 

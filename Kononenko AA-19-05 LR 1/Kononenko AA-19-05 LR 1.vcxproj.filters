@@ -21,13 +21,10 @@
     <ClCompile Include="CCS.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Utils.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="LR.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="GTNet.cpp">
+    <ClCompile Include="GazTransNet.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,7 +38,7 @@
     <ClInclude Include="Utils.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="GTNet.h">
+    <ClInclude Include="GazTransNet.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

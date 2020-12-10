@@ -31,7 +31,7 @@ std::ostream& operator << (std::ostream& out,  CPipe& p)
 std::ofstream& operator<<(std::ofstream& fout,  CPipe& p)
 {
 	fout << p.id << endl << p.diametr << endl
-		<< p.length << endl << p.repair << endl << endl;
+		<< p.length << endl << p.repair << endl << p.begin << endl << p.end << endl;
 	return fout;
 }
 
@@ -51,6 +51,8 @@ std::ifstream& operator >> (ifstream& in, CPipe& p) //!!!!!
 	in >> p.diametr;
 	in >> p.length;
 	in >> p.repair;
+	in >> p.begin;
+	in >> p.end;
 	return in;
 }
 

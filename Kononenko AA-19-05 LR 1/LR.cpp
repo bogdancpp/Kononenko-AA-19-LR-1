@@ -10,75 +10,9 @@
 #include <stack>
 #include "LR.h"
 #include <deque>
-#include "GTNet.h"
+#include "GazTransNet.h"
 
 using namespace std;
-
-template <typename C> 
-void ViewAllId(unordered_map<int, C>& pc)
-{
-	bool is_first = true;
-	for (auto& i : pc) 
-	{
-		if (!is_first)
-			cout << ", ";
-		cout << i.second.GetId();
-		is_first = false;
-	}
-	cout << endl;
-}
-template<typename C>
-void ViewAllName(unordered_map<int, C>& pc)
-{
-	bool is_first = true;
-	for ( auto& i : pc)
-	{
-		if (!is_first)
-			cout << ", ";
-		cout << i.second.name;
-		is_first = false;
-	}
-	cout << endl;
-}
-
-template <typename C>
-int CheckChoiceId(unordered_map<int, C>& object)
-{
-	do
-	{
-		cout << "select - ";
-		int choice = CheckNum(0, 100000);
-		for (auto& i : object)
-		{
-			if (choice == i.second.GetId())
-				return choice;
-			else
-				continue;
-		}
-	} while (true);
-}
-//Стоит ли в range based for писать const & ? 
-// почему вызывается повтор? менял на while
-// почему на против while стоят воск знаки менял и туда и туда
-template<typename C>
-string CheckChoiceName(unordered_map<int,C>& pc)
-{
-	string choice = "";
-	do
-	//{
-	//while (true)
-	{
-		cout << "\nChoice Name - ";
-		cin.ignore(100, '\n'); // почему вызывается повтор?
-		getline(cin, choice);
-		for (auto& i : pc) 
-		{
-			if (choice == i.second.name)
-				return choice;
-		}
-	//}
-	} while (true);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-}
 
 void menu()
 {
@@ -86,7 +20,6 @@ void menu()
 		<< "4. Edit pipe" << endl << "5. Edit compressor station" << endl << "6. Search by filter" << endl
 		<< "7. Delete object" << endl << "8. Save to file" << endl << "9. Download from file" << endl
 		<< "0. Exit mode" << endl << endl << "Selected action - ";
-
 }
 
 template<typename C>
@@ -111,7 +44,6 @@ ofstream& operator << (ofstream& fout, unordered_map<int, C>& object)
 template <typename C>
 ifstream& operator >> (ifstream& in, unordered_map<int, C>& object)
 {
-	
 	for (auto& i : object)
 	{
 		in >> i.second;
@@ -143,7 +75,7 @@ unordered_map<int, CPipe> EditSeveralPipes(unordered_map<int,CPipe>& pipes)
 
 	cout << "\n0. The pipe is serviceable\n1. Pipe repair\nChoose - ";
 	int choice = CheckNum(0, 1);
-	for (int i : res) 
+	for (const int& i : res)
 	{
 		pipes[i].repair = choice;
 	}
@@ -158,11 +90,19 @@ void EditPipe(unordered_map<int, CPipe>& pipes)
 		cout << endl;
 		EditAllPipes(pipes); 
 	}
-
 	else
 	{
 		cout << endl;
 		EditSeveralPipes(pipes);
+	}
+
+	for (auto& i : pipes)
+	{
+		if (i.second.repair == 1)
+		{
+			i.second.begin = -2;
+			i.second.end = -2;
+		}
 	}
 }
 
@@ -262,7 +202,7 @@ void ViewThat(unordered_map<int, CPipe>& pipes, unordered_map<int, CCS>& cs)
 	}
 }
 // что мы убираем ? 
-void SaveAll(unordered_map<int,CPipe>& pipes, unordered_map<int,CCS>& cs)
+void Save(unordered_map<int,CPipe>& pipes, unordered_map<int,CCS>& cs)
 {
 	ofstream fout;
 	string name;
@@ -294,7 +234,7 @@ void SaveAll(unordered_map<int,CPipe>& pipes, unordered_map<int,CCS>& cs)
 	}
 }
 // что мы убираем?
-void LoadAll(unordered_map<int,CPipe>& pipes, unordered_map<int,CCS>& cs)
+void Load(unordered_map<int,CPipe>& pipes, unordered_map<int,CCS>& cs)
 {
 	ifstream fin;
 	string name;
@@ -386,7 +326,6 @@ void SearchByFilterCs(unordered_map<int,CCS>& cs)
 		СonByFilter(cs, SearchByPercent, CheckNum(0, 100));
 	}
 }
-
 void DeleteObject(unordered_map <int,CPipe>& pipes, unordered_map <int,CCS>& cs)
 {
 	cout << "1. Delete pipe\n2. Delete compressor station\nSelect action - ";
@@ -402,7 +341,17 @@ void DeleteObject(unordered_map <int,CPipe>& pipes, unordered_map <int,CCS>& cs)
 	{
 		cout << "Enter ID: ";
 		ViewAllId(cs);
+
 		int ch = CheckChoiceId(cs);
+		for (auto& i : pipes) 
+		{
+			if (ch == i.second.begin || ch == i.second.end)
+			{
+				i.second.begin = -1;
+				i.second.end = -1;
+			}
+		}
+
 		cs.erase(ch);
 		cout << endl;
 	}
@@ -414,142 +363,8 @@ void ModeMenu()
 }
 void MenuGraph()
 {
-	cout << "\n1. Build graph\n2. Perform topological sorting\n0. Exit mode\nSelect - ";
-}
-
-void ViewMatrix(int** matrix, int size)
-{
-	cout << "\nMatrix state\n\n";
-	for (int i = 0; i < size; i++)
-	{
-		for (int j = 0; j < size; j++)
-		{
-			cout <<  matrix[i][j] << "\t";
-		}
-		cout << endl << endl;
-	}
-}
-void SearchUselessNodes(int** matrix, int size,vector<int>& useless)
-{
-	cout << "\n1. Search for unused nodes: ";
-	int t = 1;
-	for (size_t i = 0; i < size; i++)
-	{
-		t = 1;
-		for (size_t j = 0; j < size; j++)
-		{
-			if (matrix[i][j] == 0)
-				t *= 1;
-			else
-				t *= 0;
-		}
-		if (t == 1)
-		{
-			useless.push_back(i);
-		}
-	}
-	for (int i : useless)
-		cout << i << " ";
-	cout << endl;
-}
-int SearchZeroHalfStepNodes(int** matrix, int size)
-{
-	cout << "2. Search for the first vertex with a zero half-step of the outcome: ";
-	int SumRow = 0;
-	int result = 0;
-	vector <int>Included;
-	for (size_t i = 0; i < size; i++)
-	{
-		SumRow = 0;
-		Included.clear();
-		for (size_t j = 0; j < size; j++)
-		{
-			SumRow += matrix[i][j];
-			if (matrix[i][j] < 0)
-			{
-				Included.push_back(j);// не здесь инкллюд и не тот 
-			}
-		}
-		if (SumRow < 0)
-		{
-			result = i;
-			break;
-		}
-	}
-	if (Included.empty())
-	{
-		return result = -100;
-	}
-	cout << result << endl;
-	cout << "3. Delete all connection" << endl;
-	for (size_t j = 0; j < size; j++)
-	{
-		matrix[result][j] = 0;
-	}
-	for (int i : Included)
-	{
-		matrix[i][result] = 0;
-	}
-	return result;
-}
-void ClearDiagonal(int** matrix, int size)
-{
-	for (size_t i = 0; i < size; i++)
-	{
-		matrix[i][i] = 0;
-	}
-}
-bool ZeroMatrix(int** matrix, int size)
-{
-	int t = 1;
-	for (size_t i = 0; i < size; i++)
-	{
-		for (size_t j = 0; j < size; j++)
-		{
-			if (matrix[i][j] == 0)
-				t *= 1;
-			else
-				t *= 0;
-		}
-	}
-	return t;
-}
-int LastNode(int** matrix, int size,vector<int> useless, deque<int>nodes)//можно было по ссылке сделать
-{
-	int result = -1;
-	int k = 1;
-	for (size_t i = 0; i < size; i++)
-	{
-		k = 1;
-		for (int j : useless)
-		{
-			if (i != j)
-				k *= 1;
-			else
-				k *= 0;
-		}
-		for (int l : nodes)
-		{
-			if (i != l)
-				k *= 1;
-			else
-				k *= 0;
-		}
-		if (k == 1)
-			result = i;
-	}
-	return result;
-}
-void ZeroizeMatrix(int** matrix, int size)
-{
-	for (size_t i = 0; i < size; i++)
-	{
-		for (size_t j = 0; j < size; j++)
-		{
-			matrix[i][j] = 0;
-		}
-
-	}
+	cout << "\n1. Build graph\n2. Perform topological sorting\n3. Save\n4. Load\n5. Current state"<<
+		"\n6. Delete graph\n7. Delete connect\n0. Exit mode\nSelect - ";
 }
 
 int main()
@@ -557,10 +372,13 @@ int main()
 	system("color 03");
 	unordered_map <int, CPipe> pipes;
 	unordered_map <int, CCS> cs;
+	GazTransNet communication;
+	bool CRUD = true;
+	bool graph = true;
 	while (true)
 	{
-		bool CRUD = true;
-		bool graph = true;
+		CRUD = true;
+		graph = true;
 		ModeMenu();
 		switch (CheckNum(0, 2))
 		{
@@ -622,12 +440,12 @@ int main()
 				}
 				case 8:
 				{
-					SaveAll(pipes, cs);
+					Save(pipes, cs);
 					break;
 				}
 				case 9:
 				{
-					LoadAll(pipes, cs);
+					Load(pipes, cs);
 					break;
 				}
 				case 0:
@@ -642,105 +460,44 @@ int main()
 		}
 		case 2:
 		{
-			GTNet connect;
-			int NumberNodes = cs.size();
-			int** matrix = new int* [NumberNodes];
-			vector<int> useless;
-			deque<int> nodes; 
-			for (int i = 0; i < NumberNodes; i++) // вынести в отдельный метод
-			{
-				matrix[i] = new int[NumberNodes];
-				for (int j = 0; j < NumberNodes; j++)
-				{
-					matrix[i][j] = 0;
-				}
-			}
 			while (graph)
 			{
 				MenuGraph();
-				switch (CheckNum(0, 2))
+				switch (CheckNum(0, 7))
 				{
 				case 1:
 				{
-					bool repeat = true;
-					while (repeat)
-					{
-						pair<int, int> InOutPipe;
-						cout << "Connecting nodes...\nWhat kind of pipe to connect\nList id pipes: ";
-						ViewAllId(pipes);
-						bool repeat2 = false;
-						int res;
-						do
-						{
-							repeat2 = false;
-							res = CheckChoiceId(pipes);
-							if (!(pipes[res].begin == -1 && pipes[res].end == -1))
-							{
-								repeat2 = true;
-							}
-						} while (repeat2);
-						cout << "List id CS: ";
-						ViewAllId(cs);
-						cout << "From ";
-						InOutPipe.first = CheckChoiceId(cs);
-						//pipes[res].begin = n.first;
-						cout << "Where ";
-						InOutPipe.second = CheckChoiceId(cs);
-						connect.InOutPipes.emplace(res, InOutPipe);
-						connect.FillingIncidentMatrix();
-						system("pause");
-						//pipes[res].end = n.second;
-						matrix[InOutPipe.first][InOutPipe.second] = 1;
-						matrix[InOutPipe.second][InOutPipe.first] = -1;
-						ViewMatrix(matrix, NumberNodes);
-
-						cout << "\nExit?\n1. Yes\n2. No\nSelect - ";
-						if (CheckNum(1, 2) == 1)
-						{
-							repeat = false;
-						}
-					}
+					communication.EstablishСonnection(pipes, cs);
 					break;
 				}
 				case 2:
 				{
-					cout << "\nTopological sorting...\n";
-					ClearDiagonal(matrix, NumberNodes);
-					SearchUselessNodes(matrix, NumberNodes, useless);
-					bool loop = true;
-					while ((!ZeroMatrix(matrix, NumberNodes)) && loop)
-					{
-						int res = 0;
-						res = SearchZeroHalfStepNodes(matrix, NumberNodes);
-						if (res == -100)
-						{
-							cout << "\nThe graph contains a loop\n";
-							loop = false;
-						}
-						else
-						{
-							nodes.push_back(res);
-							ViewMatrix(matrix, NumberNodes);
-							cout << "\n3. If the matrix is nonzero do point 2\n";
-						}
-					}
-					if (loop)
-					{
-						nodes.push_back(LastNode(matrix, NumberNodes, useless, nodes));
-						cout << "Else answer: ";
-						cout << "Result topological sorting: \n";
-						int i = 1;
-						while (!nodes.empty())
-						{
-							cout << i << " - " << nodes.back() << " " << endl;
-							nodes.pop_back();
-							++i;
-						}
-					}
-					else
-					{
-						ZeroizeMatrix(matrix, NumberNodes);
-					}
+					communication.TopologicalSorting(pipes);
+					break;
+				}
+				case 3:
+				{
+					Save(pipes, cs);
+					break;
+				}
+				case 4:
+				{
+					Load(pipes, cs);
+					break;
+				}
+				case 5:
+				{
+					communication.CurrentState(pipes);
+					break;
+				}
+				case 6:
+				{
+					communication.DeleteGraph(pipes);
+					break;
+				}
+				case 7:
+				{
+					communication.DeleteConnect(pipes);
 					break;
 				}
 				case 0:
@@ -750,7 +507,6 @@ int main()
 				}
 				}
 			}
-			delete[] matrix;
 			break;
 		}
 		case 0:

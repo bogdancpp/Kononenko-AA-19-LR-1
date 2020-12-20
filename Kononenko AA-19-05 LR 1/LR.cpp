@@ -364,7 +364,7 @@ void ModeMenu()
 void MenuGraph()
 {
 	cout << "\n1. Build graph\n2. Perform topological sorting\n3. Save\n4. Load\n5. Current state"<<
-		"\n6. Delete graph\n7. Delete connect\n0. Exit mode\nSelect - ";
+		"\n6. Delete graph\n7. Delete connect\n8. Shortcut\n9. Max flow\n0. Exit mode\nSelect - ";
 }
 
 int main()
@@ -380,8 +380,7 @@ int main()
 		CRUD = true;
 		graph = true;
 		ModeMenu();
-		switch (CheckNum(0, 2))
-		{
+		switch (CheckNum(0, 2)){
 		case 1:
 		{
 			while (CRUD)
@@ -458,50 +457,53 @@ int main()
 			}
 			break;
 		}
-		case 2:
-		{
-			while (graph)
-			{
+		case 2:{
+			while (graph){
 				MenuGraph();
-				switch (CheckNum(0, 7))
-				{
-				case 1:
-				{
+				switch (CheckNum(0, 9)){
+				case 1:{
 					communication.EstablishÑonnection(pipes, cs);
 					break;
 				}
-				case 2:
-				{
+				case 2:{
 					communication.TopologicalSorting(pipes);
 					break;
 				}
-				case 3:
-				{
+				case 3:{
 					Save(pipes, cs);
 					break;
 				}
-				case 4:
-				{
+				case 4:{
 					Load(pipes, cs);
 					break;
 				}
-				case 5:
-				{
+				case 5:{
 					communication.CurrentState(pipes);
 					break;
 				}
-				case 6:
-				{
+				case 6:{
 					communication.DeleteGraph(pipes);
 					break;
 				}
-				case 7:
-				{
+				case 7:{
 					communication.DeleteConnect(pipes);
 					break;
 				}
-				case 0:
-				{
+				case 8: {
+					cout << "Choice start vetrix - ";
+					ViewAllId(cs);
+					communication.Shortcut(pipes, CheckChoiceId(cs));
+					break;
+				}
+				case 9: {
+					cout << "Choice source and stock vetrixes - ";
+					ViewAllId(cs);
+					int source = CheckChoiceId(cs);
+					int stock = CheckChoiceId(cs);
+					communication.view_max_flow(pipes, source, stock);
+					break;
+				}
+				case 0:{
 					graph = false;
 					break;
 				}

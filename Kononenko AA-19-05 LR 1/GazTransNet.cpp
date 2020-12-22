@@ -6,20 +6,14 @@ using namespace std;
 #define GREY 1
 #define BLACK 2
 
-//int capacity[100][100], // Матрица пропускных способнотей
 int n;
-vector<vector<int>> flow;  // Матрица потока
-vector<int> color;  // Матрица потока
-vector<int> pred;  // Матрица потока
-vector<int> q;  // Матрица потока
+vector<vector<int>> flow;  
+vector<int> color;  
+vector<int> pred; 
+vector<int> q;  
 
-//flow[100][100],
-//color[100],      // Цвета для вершин
-//pred[100];       // Массив пути
-int head, tail;  // Начало, Конец
-//int q[102];      // Очередь, хранящ
+int head, tail;  
 
-//Сравнение двух целых значений
 int min(int x, int y)
 {
 	if (x < y)
@@ -27,45 +21,44 @@ int min(int x, int y)
 	else
 		return y;
 }
-//Добавить в очередь(мы ступили на вершину)
+
 void enque(int x)
 {
-	q[tail] = x;     // записать х в хвост
-	tail++;          // хвостом становиться следующий элемент
-	color[x] = GREY; // Цвет серый (из алгоритма поиска)
+	q[tail] = x;     
+	tail++;          
+	color[x] = GREY; 
 }
-//Убрать из очереди(Вершина чёрная, на неё не ходить)
 int deq()
 {
-	int x = q[head];  // Записать в х значение головы
-	head++;           // Соответственно номер начала очереди увеличивается
-	color[x] = BLACK; // Вершина х - отмечается как прочитанная
-	return x;         // Возвращается номер х прочитанной вершины
+	int x = q[head]; 
+	head++;           
+	color[x] = BLACK; 
+	return x;        
 }
-//Поиск в ширину
+
 int GazTransNet::bfs(int start, int end)
 {
 	int u, v;
-	for (u = 0; u < n; u++) // Сначала отмечаем все вершины не пройденными
+	for (u = 0; u < n; u++) 
 		color[u] = WHITE;
 
-	head = 0;   // Начало очереди 0
-	tail = 0;   // Хвост 0
-	enque(start);      // Вступили на первую вершину
-	pred[start] = -1;   // Специальная метка для начала пути
-	while (head != tail)  // Пока хвост не совпадёт с головой
+	head = 0;  
+	tail = 0;   
+	enque(start);    
+	pred[start] = -1; 
+	while (head != tail)  
 	{
-		u = deq();       // вершина u пройдена
-		for (v = 0; v < n; v++) // Смотрим смежные вершины
+		u = deq();  
+		for (v = 0; v < n; v++) 
 		{
-			// Если не пройдена и не заполнена
+			
 			if (color[v] == WHITE && (link[u][v] - flow[u][v]) > 0) {
-				enque(v);  // Вступаем на вершину v
-				pred[v] = u; // Путь обновляем
+				enque(v);  
+				pred[v] = u; 
 			}
 		}
 	}
-	if (color[end] == BLACK) // Если конечная вершина, дошли - возвращаем 0
+	if (color[end] == BLACK) 
 		return 0;
 	else return 1;
 }
@@ -73,25 +66,25 @@ int GazTransNet::bfs(int start, int end)
 int GazTransNet::max_flow(int source, int stock)
 {
 	int i, j, u;
-	int maxflow = 0;            // Изначально нулевой
-	for (i = 0; i < n; i++)  // Зануляем матрицу потока
+	int maxflow = 0;          
+	for (i = 0; i < n; i++)  
 	{
 		for (j = 0; j < n; j++)
 			flow[i][j] = 0;
 	}
-	while (bfs(source, stock) == 0)             // Пока сеществует путь
+	while (bfs(source, stock) == 0)             
 	{
 		int delta = 10000;
-		for (u = n - 1; pred[u] >= 0; u = pred[u]) // Найти минимальный поток в сети
+		for (u = n - 1; pred[u] >= 0; u = pred[u]) 
 		{
-			delta = min(delta, (link[pred[u]][u] - flow[pred[u]][u]));//!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			delta = min(delta, (link[pred[u]][u] - flow[pred[u]][u]));
 		}
-		for (u = n - 1; pred[u] >= 0; u = pred[u]) // По алгоритму Форда-Фалкерсона 
+		for (u = n - 1; pred[u] >= 0; u = pred[u]) 
 		{
 			flow[pred[u]][u] += delta;
 			flow[u][pred[u]] -= delta;
 		}
-		maxflow += delta;                       // Повышаем максимальный поток
+		maxflow += delta;                  
 	}
 	return maxflow;
 }
@@ -99,10 +92,10 @@ int GazTransNet::max_flow(int source, int stock)
 void GazTransNet::view_max_flow(const unordered_map<int, CPipe>& pipes, int& source, int& stock)
 {
 	vector <pair<int, int>> InOut;
-	pair<int, int> io;// заполнение пригодными трубами, узлами
+	pair<int, int> io;
 	for (const auto& i : pipes)
 	{
-		if (!(i.second.begin == -1 || i.second.end == -1 || i.second.begin == -2 || i.second.end == -2))//можно скоратить в 2 раза
+		if (!(i.second.begin == -1 || i.second.end == -1 || i.second.begin == -2 || i.second.end == -2))
 		{
 			io.first = i.second.begin;
 			io.second = i.second.end;
@@ -112,7 +105,7 @@ void GazTransNet::view_max_flow(const unordered_map<int, CPipe>& pipes, int& sou
 	}
 
 	vector<int> nodes;
-	int add = 1;// беру неповторяющиеся узлы для матрицы
+	int add = 1;
 	for (const auto& i : InOut)
 	{
 		add = 1;
@@ -160,8 +153,8 @@ void GazTransNet::view_max_flow(const unordered_map<int, CPipe>& pipes, int& sou
 	//n = stock + 1;
 	link.resize(size, vector<int>(size));
 	flow.resize(size, vector<int>(size));
-	color.resize(size);  // Матрица потока
-	pred.resize(size);  // Матрица потока
+	color.resize(size);  
+	pred.resize(size); 
 	q.resize(size);
 
 	for (auto& i : link) {
@@ -173,7 +166,7 @@ void GazTransNet::view_max_flow(const unordered_map<int, CPipe>& pipes, int& sou
 	FillingLink(InOut, nodes, pipes);
 	cout << endl;
 	ViewLink(nodes);
-	cout << "Max flow: " << max_flow(source, stock) << endl;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	cout << "Max flow: " << max_flow(source, stock) << endl;
 
 	cout << "\n\nn = " << n << endl;
 
@@ -311,7 +304,7 @@ int GazTransNet::SearchZeroHalfStepNodes(const vector<int>& nodes, deque<int> To
 				k *= 0;
 			if (matrix[i][j] < 0)
 			{
-				Included.push_back(j);// не здесь инкллюд и не тот 
+				Included.push_back(j);
 			}
 		}
 		if (TopologicNodes.empty())
@@ -354,7 +347,7 @@ int GazTransNet::SearchZeroHalfStepNodes(const vector<int>& nodes, deque<int> To
 		{
 			matrix[index][j] = 0;
 		}
-		for (int i : Included)// здесь ошибка!!!!!!!!!!
+		for (int i : Included)
 		{
 			matrix[i][index] = 0;
 		}
@@ -393,10 +386,10 @@ void BubbleSort(vector<int>& values) {
 void GazTransNet::TopologicalSorting(const unordered_map<int, CPipe>& pipes)
 {
 	vector <pair<int, int>> InOut;
-	pair<int, int> io;// заполнение пригодными трубами, узлами
+	pair<int, int> io;
 	for (const auto& i : pipes)
 	{
-		if (!(i.second.begin == -1 || i.second.end == -1 || i.second.begin == -2 || i.second.end == -2))//можно скоратить в 2 раза
+		if (!(i.second.begin == -1 || i.second.end == -1 || i.second.begin == -2 || i.second.end == -2))
 		{
 			io.first = i.second.begin;
 			io.second = i.second.end;
@@ -432,9 +425,7 @@ void GazTransNet::TopologicalSorting(const unordered_map<int, CPipe>& pipes)
 			nodes.push_back(i.second);
 
 	}
-	//for (int i : nodes) {
-	//	cout << "add node - " << i << endl;
-	//}	
+
 	BubbleSort(nodes);
 	//cout << "\n\nBubbleSort" << endl << endl;
 	//for (int i : nodes) {

@@ -500,8 +500,6 @@ int main()
 					ViewAllId(cs);
 					int source = CheckChoiceId(cs),
 					stock = CheckChoiceId(cs);
-				/*	int stock;
-					cin >> stock;*/
 					communication.view_max_flow(pipes, source, stock);
 					break;
 				}

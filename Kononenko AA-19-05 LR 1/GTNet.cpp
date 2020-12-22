@@ -1,33 +1,19 @@
 #include "GTNet.h"
 #include <iostream>
+#include <string>
+#include <fstream>
 
-void GTNet::FillingIncidentMatrix()
+void GTNet::Pip(unordered_map<int, CPipe>& pipes)
 {
-	std::vector<int> allnodes;// мб создать просто пары интов
-	std::vector<int> nodes;
-	for (auto i : GTNet::InOutPipes)
+	for (auto& i : pipes)
 	{
-		allnodes.push_back(i.second.first);
-		allnodes.push_back(i.second.second);
+		i.second.begin = 546;
+		std::cout << "Pipes " << i.first << "in " << i.second.begin << " out " << i.second.end << endl;
 	}
-	int add = 1;
-	for (int i : allnodes)
-	{
-		add = 1;
-		for (int j : nodes)
-		{
-			if (i != j)
-				add *= 1;
-			else
-				add *= 0;
-		}
-		if (add == 1)
-			nodes.push_back(i);
-	}
-	for (int i : nodes)
-		std::cout << "add nodes - " << i << std::endl;
-	
-	int size = nodes.size();
+}
+
+void GTNet::CreateMatrix()
+{
 	GTNet::matrix = new int* [size];
 	for (size_t i = 0; i < size; i++)
 	{
@@ -37,121 +23,285 @@ void GTNet::FillingIncidentMatrix()
 			matrix[i][j] = 0;
 		}
 	}
-	int in;
-	int out;
-	int indexIn = 0;
-	int indexOut = 0;
-	// попробовать до минус одного
-	//std::vector<int>  p;
-	//for (int i : allnodes)
-	//{
-	//	indexIn = 0;
-	//	indexOut = 0;
-	//	for (int j : nodes)
-	//	{
-	//		if (i != j)
-	//		{
-	//			++indexIn;
-	//		}
-	//		if ((i+1) != j)
-	//		{
-	//			++indexOut;
-	//		}
-	//		GTNet::matrix[indexIn][indexOut] = 1;
-	//		GTNet::matrix[indexOut][indexIn] = -1;
-	//	}
-	//}
+}
 
-	//for (size_t i = 0; i < allnodes.size(); i++)
-	//{
-	//	indexIn = 0;
-	//	indexOut = 0;
-	//	for (int j : nodes)
-	//	{
-	//		if ((i % 2) == 0)
-	//		{
-	//			if (allnodes[i] == j)
-	//				indexIn = ;
-	//		}
-	//		else
-	//		{
-	//			if (allnodes[i] != j)
-	//				++indexOut;
-	//		}
-	//	}
-	//	GTNet::matrix[indexIn][indexOut] = 1;
-	//	GTNet::matrix[indexOut][indexIn] = -1;
-	//}
-	for (auto i : InOutPipes)
-	{
-		std::cout << " 1 connect - " << i.second.first << std::endl;
-		std::cout << " 2 connect - " << i.second.second << std::endl;
-	}
+void GTNet::update()
+{
+	std::vector<int> Allinteraction;
+	Allinteraction.clear();
+	GTNet::nodes.clear();
 
-	std::pair<int, int> inout;
-	for (auto i : InOutPipes)
+	for (const auto& i : GTNet::InOutPipes)
 	{
-		for (size_t j = 0; j < nodes.size(); j++)
+		if (!(i.second.first == -2 || i.second.second == -2)) // Check Repair
 		{
-			std::cout << "CHECK WORK: " << i.second.first << " - " << nodes[j] << std::endl;
-			std::cout << "2CHECK WORK: " << i.second.second << " - " << nodes[j] << std::endl;
-			if (i.second.first == nodes[j])
-				inout.first = j;
-			if (i.second.second == nodes[j])
-				inout.second = j;
+			Allinteraction.push_back(i.second.first);
+			Allinteraction.push_back(i.second.second);
 		}
-		std::cout << " 1 result: " << inout.first << std::endl;
-		std::cout << " 2 result: " << inout.second << std::endl;
-		matrix[inout.first][inout.second] = 1;
-		matrix[inout.second][inout.first] = -1;
 	}
 
-	//for (size_t i = 0; i < allnodes.size(); i++)
-	//{
-	//	for (size_t j = 0; j < nodes.size(); j++)
-	//	{
-	//		if ((i % 2) == 0)
-	//		{
-	//			if (allnodes[i] == nodes[j])
-	//				indexIn = j;//0
-	//		}
-	//		else
-	//		{
-	//			if (allnodes[i] == nodes[j])
-	//				indexOut = j;//null
-	//		}
-	//	}
-	//	GTNet::matrix[indexIn][indexOut] = 1;
-	//	GTNet::matrix[indexOut][indexIn] = -1;
-	//}
-	//for (auto i : GTNet::InOutPipes)
-	//{
-	//	in = i.second.first;
-	//	out = i.second.second;
-	//	indexIn = 0;
-	//	indexOut = 0;
-	//	for (auto j : nodes)
-	//	{
-	//		if (in != j)
-	//		{
-	//			++indexIn;
-	//		}
-	//		if (out != j)
-	//		{
-	//			++indexOut;
-	//		}
-	//		GTNet::matrix[indexIn][indexOut] = 1;
-	//		GTNet::matrix[indexOut][indexIn] = -1;
-	//	}
-	//}
-	// просто чистим диагональ
-	std::cout << "\nMatrix state\n\n";
-	for (int i = 0; i < size; i++)
+	int add = 1;
+	for (const int& i : Allinteraction)
 	{
-		for (int j = 0; j < size; j++)
+		add = 1;
+		for (const int& j : GTNet::nodes)
+		{
+			if (i != j)
+				add *= 1;
+			else
+				add *= 0;
+		}
+		if (add == 1)
+			GTNet::nodes.push_back(i);
+	}
+
+	//check
+
+	//std::cout << " ------------------------------------------------ \n" << std::endl;
+	//for (int i : GTNet::nodes)
+	//	std::cout << "add nodes - " << i << std::endl;
+	//std::cout << " ------------------------------------------------ \n" << std::endl;
+
+	GTNet::size = GTNet::nodes.size();
+	CreateMatrix();
+}
+
+void GTNet::ViewMatrix()
+{
+	std::cout << "\nMatrix state\n\n";
+	for (int i = 0; i < GTNet::size; i++)
+	{
+		for (int j = 0; j < GTNet::size; j++)
 		{
 			std::cout << GTNet::matrix[i][j] << "\t";
 		}
 		std::cout << std::endl << std::endl;
 	}
 }
+
+void GTNet::FillingIncidentMatrix()
+{
+	update();
+
+	std::pair<int, int> inOut;
+	for (const auto&i : GTNet::InOutPipes)
+	{
+		for (size_t j = 0; j < nodes.size(); j++)
+		{
+			if (i.second.first == nodes[j])
+				inOut.first = j;
+			if (i.second.second == nodes[j])
+				inOut.second = j;
+		}
+		GTNet::matrix[inOut.first][inOut.second] = 1;
+		GTNet::matrix[inOut.second][inOut.first] = -1;
+	}
+
+	//for (size_t i = 0; i < GTNet::size; i++)
+	//{
+	//	matrix[i][i] = 0;
+	//}
+
+	/*std::cout << "----------------------------------------" << std::endl << std::endl;
+
+	for (const auto& i : GTNet::InOutPipes)
+		std::cout << "Pipe " << i.first << " in " << i.second.first << " out " << i.second.second << std::endl << std::endl;
+
+	std::cout << "----------------------------------------" << std::endl << std::endl;*/
+
+	GTNet::ViewMatrix();
+}
+
+void GTNet::DeleteMatrix()
+{
+	// использовать умные указатели
+}
+
+bool GTNet::ZeroMatrix()
+{
+	int t = 1;
+	GTNet::size;
+	for (size_t i = 0; i < GTNet::size; i++)
+	{
+		for (size_t j = 0; j < size; j++)
+		{
+			if (GTNet::matrix[i][j] == 0)
+				t *= 1;
+			else
+				t *= 0;
+		}
+	}
+	return t;
+}
+
+int GTNet::SearchZeroHalfStepNodes()
+{
+	std::cout << "2. Search for the first vertex with a zero half-step of the outcome: ";
+	int SumRow = 0;
+	int addNode = 0;
+	int index = 0;
+	std::vector <int> Included;
+	GTNet::size = GTNet::nodes.size();//в принципе это делать не обязательно
+	for (size_t i = 0; i < GTNet::size; i++)
+	{
+		SumRow = 0;
+		Included.clear();
+		for (size_t j = 0; j < GTNet::size; j++)
+		{
+			SumRow += matrix[i][j];
+			if (matrix[i][j] < 0)
+			{
+				Included.push_back(j);// не здесь инкллюд и не тот 
+			}
+		}
+		if (SumRow < 0)
+		{
+			index = i;
+			break;
+		}
+
+	}
+
+	if (Included.empty())
+	{
+		return addNode = -100;
+	}
+
+	addNode = nodes[index];
+
+	std::cout << addNode << std::endl;
+	std::cout << "3. Delete all connection" << std::endl;
+	for (size_t j = 0; j < size; j++)
+	{
+		matrix[index][j] = 0;
+	}
+	for (int i : Included)
+	{
+		matrix[i][index] = 0;
+	}
+
+	addNode = nodes[index];
+
+	return addNode;
+}
+
+int GTNet::LastNode()//можно было по ссылке сделать
+{
+	int result = -1;
+	int k = 1;
+	for (size_t i = 0; i < size; i++)
+	{
+		k = 1;
+		//for (int j : useless)
+		//{
+		//	if (i != j)
+		//		k *= 1;
+		//	else
+		//		k *= 0;
+		//}
+		for (int l : nodes)
+		{
+			if (i != l)
+				k *= 1;
+			else
+				k *= 0;
+		}
+		if (k == 1)
+			result = i;
+	}
+	return result;
+}
+
+void GTNet::save()
+{
+	std::ofstream fout;
+	std::string name;
+	std::cout << "Enter name file: ";
+	std::cin.ignore(1, '\n');// что мы убираем?
+	getline(std::cin, name);
+	fout.open(name, std::ios::out);
+	if (fout.is_open())
+	{
+		fout << GTNet::InOutPipes.size() << std::endl;
+		for (const auto& i : GTNet::InOutPipes)
+		{
+			fout << i.first << std::endl;
+			fout << i.second.first << std::endl;
+			fout << i.second.second << std::endl;
+		}
+		std::cout << "File saved\n\n";
+		fout.close();
+	}
+}
+
+void GTNet::load()
+{
+	std::ifstream fin;
+	std::string name;
+	std::cout << "Enter name file: ";
+	std::cin.ignore(1, '\n');// что мы убираем?
+	getline(std::cin, name);
+	fin.open(name, std::ios::in);
+	int id, size;
+	std::pair<int, int> InOut;
+	GTNet::InOutPipes.clear();
+	if (fin.is_open())
+	{
+		fin >> size;
+		for (size_t i = 0; i < size; i++)
+		{
+			fin >> id;
+			fin >> InOut.first;
+			fin >> InOut.second;
+			GTNet::InOutPipes.emplace(id, InOut);
+		}
+		fin.close();
+		std::cout << "Data downloaded\n\n";
+	}
+}
+
+void GTNet::TopologicalSorting()
+{
+	FillingIncidentMatrix();
+	std::cout << "\nTopological sorting...\n";
+	bool loop = true;
+	int addNode = 0;
+	while ((!ZeroMatrix()) && loop)
+	{
+		addNode = 0;
+		addNode = SearchZeroHalfStepNodes();
+		if (addNode == -100)
+		{
+			std::cout << "\nThe graph contains a loop\n";
+			loop = false;
+		}
+		else
+		{
+			TopologicNodes.push_back(addNode);
+			ViewMatrix();
+			std::cout << "\n3. If the matrix is nonzero do point 2\n";
+		}
+	}
+	if (loop)
+	{
+		TopologicNodes.push_back(LastNode());
+		std::cout << "Else answer: ";
+		std::cout << "Result topological sorting: \n";
+		int i = 1;
+		while (!TopologicNodes.empty())
+		{
+			std::cout << i << " - " << TopologicNodes.back() << " " << std::endl;
+			TopologicNodes.pop_back();
+			++i;
+		}
+	}
+	else
+	{
+		CreateMatrix();
+	}
+}
+
+
+
+
+

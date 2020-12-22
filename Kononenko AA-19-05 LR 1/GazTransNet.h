@@ -16,7 +16,7 @@ public:
 
 	void Shortcut(const unordered_map<int, CPipe>& pipes, const int& choice);
 	int max_flow(int source, int stock);
-	void view_max_flow(const unordered_map<int, CPipe>& pipes, const int& source, const int& stock);
+	void view_max_flow(const unordered_map<int, CPipe>& pipes, int& source, int& stock);
 private:
 	int** matrix;
 	int size = 0;

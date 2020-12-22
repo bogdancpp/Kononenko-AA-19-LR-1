@@ -96,7 +96,7 @@ int GazTransNet::max_flow(int source, int stock)
 	return maxflow;
 }
 
-void GazTransNet::view_max_flow(const unordered_map<int, CPipe>& pipes, const int& source, const int& stock)
+void GazTransNet::view_max_flow(const unordered_map<int, CPipe>& pipes, int& source, int& stock)
 {
 	vector <pair<int, int>> InOut;
 	pair<int, int> io;// заполнение пригодными трубами, узлами
@@ -140,10 +140,23 @@ void GazTransNet::view_max_flow(const unordered_map<int, CPipe>& pipes, const in
 	}
 
 	int size = nodes.size();
+
+	for (size_t i = 0; i < size; i++) {
+		if (nodes[i] == stock)
+			stock = i;
+		if (nodes[i] == source)
+			source = i;
+	}
+
 	if (stock > source)
 		n = stock + 1;
 	else
 		n = source + 1;
+
+
+
+	//cout << "\n\nn = " << n << endl;
+
 	//n = stock + 1;
 	link.resize(size, vector<int>(size));
 	flow.resize(size, vector<int>(size));
@@ -161,6 +174,8 @@ void GazTransNet::view_max_flow(const unordered_map<int, CPipe>& pipes, const in
 	cout << endl;
 	ViewLink(nodes);
 	cout << "Max flow: " << max_flow(source, stock) << endl;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	cout << "\n\nn = " << n << endl;
 
 }
 
@@ -365,6 +380,16 @@ void GazTransNet::DeleteGraph(unordered_map<int, CPipe>& pipes)
 	}
 }
 
+void BubbleSort(vector<int>& values) {
+	for (size_t idx_i = 0; idx_i + 1 < values.size(); ++idx_i) {
+		for (size_t idx_j = 0; idx_j + 1 < values.size() - idx_i; ++idx_j) {
+			if (values[idx_j + 1] < values[idx_j]) {
+				swap(values[idx_j], values[idx_j + 1]);
+			}
+		}
+	}
+}
+
 void GazTransNet::TopologicalSorting(const unordered_map<int, CPipe>& pipes)
 {
 	vector <pair<int, int>> InOut;
@@ -407,6 +432,17 @@ void GazTransNet::TopologicalSorting(const unordered_map<int, CPipe>& pipes)
 			nodes.push_back(i.second);
 
 	}
+	//for (int i : nodes) {
+	//	cout << "add node - " << i << endl;
+	//}	
+	BubbleSort(nodes);
+	//cout << "\n\nBubbleSort" << endl << endl;
+	//for (int i : nodes) {
+	//	cout << "add node - " << i << endl;
+	//}
+
+
+
 
 	//int size = nodes.size();
 	size = nodes.size();
